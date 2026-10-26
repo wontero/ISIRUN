@@ -10,6 +10,8 @@
 > Va a seguir en el historial de commits (git no borra el pasado), y está bien: no tiene contraseñas ni nada privado.
 > Lo que importa es que **no esté en la versión final ni en el ZIP**.
 
+> **Orden de trabajo: Victor → Nico → Harold → Mauricio, de a uno.** Tus tareas están en la [sección 15](#15-turnos-de-trabajo-git-y-registro-de-avance). Antes de empezar, lee el **registro de avance (15.4)** para saber en qué quedó la persona anterior.
+
 Lee este archivo **completo** antes de escribir una línea de código. Si usas una IA para programar, **pásale este archivo entero como contexto** antes de pedirle cualquier cosa (ver la sección 14).
 
 ---
@@ -673,42 +675,180 @@ Está bien usar IA. **Pero eres responsable de lo que subes y te lo van a pregun
 
 ---
 
-## 15. Git: ramas, commits y reparto del trabajo
+## 15. Turnos de trabajo, Git y registro de avance
 
-### Flujo (simple)
+### 15.1 Orden de trabajo
+Se trabaja **por turnos, de a uno, en este orden**. Nadie empieza hasta que la persona anterior terminó, subió todo y completó su parte del registro (15.4).
+
+| Turno | Quién | Qué deja listo |
+|---|---|---|
+| 1 | **Victor** | Base de datos completa: entidades, DbContext, migración, servicios auxiliares y datos de prueba (seed) |
+| 2 | **Nico** | Cuentas (registro, login y roles), perfil del corredor, actividades, feed y amigos |
+| 3 | **Harold** | Carreras del corredor (catálogo, detalle, inscripción y ranking), equipos, organizaciones, sponsors y perfil de la organización |
+| 4 | **Mauricio** | Panel de la organización, crear/editar/eliminar/terminar carrera, los 2 reportes y la entrega final |
+
+### 15.2 Al empezar y al terminar tu turno (todos)
+**Al empezar:**
 ```bash
-git pull                              # siempre antes de empezar
-git checkout -b equipos-conectar      # una rama por tarea
-# ...trabajas...
-dotnet build                          # tiene que compilar
-git add .
-git commit -m "Conecta la lista de equipos con la base de datos"
-git push -u origin equipos-conectar
+git pull
+dotnet ef database update      # desde el turno 2 en adelante
+dotnet run --project ISIRUN
 ```
-Después abren un **Pull Request** en GitHub y otro integrante lo revisa y lo mergea a `main`. **Nunca hagan `push --force` a `main`.**
+1. Lee el **registro de avance (15.4)**: qué dejó hecho la persona anterior y qué te avisa.
+2. Comprueba que la app compila y arranca **antes** de tocar nada. Si no arranca, avísale a la persona anterior; no lo "arregles" a ciegas.
 
-### Commits que cuentan para la nota (10 pts individuales)
+**Mientras trabajas:**
+- Trabajen directo en `main` (como no trabajan a la vez, no hacen falta ramas).
+- **Un commit por cada tarea terminada** de tu lista, con un mensaje descriptivo. Como mínimo **5 commits** por persona (la nota individual de GitHub vale 10 pts).
+- `dotnet build` antes de cada commit y `git push` al final de cada día. Si tu PC se rompe, el avance no se pierde.
+
+**Al terminar:**
+1. Revisa la "Definición de terminado" de tu turno: **todo** tiene que cumplirse.
+2. Actualiza este archivo: marca tus `[x]`, completa tu fila del registro (15.4) y escribe tu nota para la siguiente persona.
+3. Commit y push:
+   ```bash
+   git add .
+   git commit -m "Actualiza collab.md: termina turno de <tu nombre>"
+   git push
+   ```
+4. Avisa en el grupo que terminaste.
+
+**Ejemplos de mensajes de commit:**
 - ✅ `Agrega entidades Carrera, CategoriaEdad y Resultado según el DER`
 - ✅ `Implementa inscripción a carrera con asignación de categoría por edad`
-- ✅ `Agrega validación de rangos de edad superpuestos en CrearCarrera`
 - ❌ `cambios`, `fix`, `asdf`, `subo mi parte`, `update`
-- ❌ Un solo commit gigante al final con todo. Hagan **commits chicos y seguidos**.
-- Configuren su nombre real para que se vea quién hizo qué:
+- Configura tu nombre real **antes del primer commit**, para que se vea quién hizo qué:
   ```bash
   git config --global user.name "Nombre Apellido"
-  git config --global user.email "el-mismo-de-github@correo.com"
+  git config --global user.email "el-mismo-de-tu-github@correo.com"
   ```
+- **Nunca** `git push --force`.
 
-### Reparto sugerido (ajústenlo a la cantidad de integrantes)
-| # | Área | Archivos | Depende de |
-|---|---|---|---|
-| A | **Base de datos**: entidades, DbContext, migración inicial, seed | `Models/`, `Data/` | — (**va primero**) |
-| B | **Cuentas**: registro, login, logout, roles, iniciales en la barra | `CuentaController`, `Program.cs`, `_Nav*` | A |
-| C | **Corredor**: perfil, actividades (CRUD), feed y likes, amigos | `Corredor`, `Actividades`, `Feed`, `Amigos` | A, B |
-| D | **Carreras del corredor**: catálogo y filtros, detalle, inscribirse/cancelar, resultados, equipos | `Carreras`, `Equipos`, `Organizaciones` | A, B |
-| E | **Organización**: panel, crear/editar/eliminar carrera, vínculos, terminar (simulación), **los 2 reportes** | `Organizacion`, `Reportes`, `Services/` | A, B |
+---
 
-Mientras A termina la base, el resto puede ir creando los **ViewModels** de sus pantallas (no dependen de la base).
+### 15.3 Tareas por turno
+
+#### 🟦 Turno 1: Victor · Base de datos
+Lee primero las secciones **7** y **11** completas.
+
+- [ ] Instalar los paquetes de EF Core y la herramienta `dotnet-ef` (7.1)
+- [ ] Crear las 11 entidades en `Models/` según `DER_actualizado.md` (7.2), con `[Required]`, `[StringLength]` y la navegación (`ICollection<...>`)
+- [ ] Crear `EstadosCarrera` con las constantes `Abierta` y `Terminada` (7.2)
+- [ ] Crear `Data/IsirunContext.cs` **copiando** la configuración de 7.3 (claves compuestas, emails únicos y `NoAction`)
+- [ ] Agregar la cadena de conexión a LocalDB y registrar el DbContext en `Program.cs` (7.4)
+- [ ] Crear la migración `Inicial` y comprobar que `dotnet ef database update` crea la base sin errores (7.5)
+- [ ] Crear la carpeta `Helpers/` con: `FormatoTiempo`, `FormatoRitmo` (11.3), `Edad(nacimiento, dia)` (11.1) e `Iniciales(nombre)` (sección 10, paso 5)
+- [ ] Crear `Services/SimulacionCarreraService.cs` con el método `Terminar` de 11.2 y registrarlo en `Program.cs` (`builder.Services.AddScoped<SimulacionCarreraService>()`)
+- [ ] Crear `Data/SeedData.cs` (7.6): 3 equipos, ~15 corredores, 3 organizaciones, 4 carreras (2 abiertas con inscritos y 2 **terminadas usando `SimulacionCarreraService`**), categorías, sponsors, co-organizadoras, actividades, likes y amistades. Las contraseñas se guardan con `PasswordHasher` (sección 8) y **todas** son `Prueba123!`
+- [ ] Ejecutar el seed al arrancar la app **solo si la base está vacía**
+- [ ] Crear `README.md` en la raíz con: nombre y descripción del proyecto, requisitos y pasos para crear la base y ejecutar (sección 16). Los demás lo van completando.
+- [ ] Anotar en el registro (15.4) **un correo de corredor y uno de organización** del seed, para que los demás puedan probar
+
+**Definición de terminado:**
+- Una persona que clona el repo y ejecuta `dotnet ef database update` + `dotnet run` obtiene la base creada **con datos**.
+- En SQL Server Object Explorer (Visual Studio) se ven las 11 tablas con datos, y las 2 carreras terminadas tienen `Tiempo` y `Ranking` llenos.
+- Las vistas siguen mostrando datos de ejemplo (eso está bien: conectarlas es trabajo de los turnos siguientes).
+
+---
+
+#### 🟩 Turno 2: Nico · Cuentas, perfil, actividades, feed y amigos
+Lee primero las secciones **8**, **10** y **13**.
+
+**Cuentas**
+- [ ] Configurar la autenticación por cookies en `Program.cs`, con `UseAuthentication` antes de `UseAuthorization` (sección 8)
+- [ ] Crear la extensión `User.ObtenerId()` (sección 8) y usarla en todos lados
+- [ ] `LoginViewModel` + login real (busca en Corredores y luego en Organizaciones; el mismo mensaje de error para ambos casos)
+- [ ] `RegistroViewModel` + registro de los 2 tipos, con validaciones (13): email único en **ambas** tablas, contraseñas que coinciden, edad ≥ 5. Inicia sesión automáticamente y redirige según el tipo
+- [ ] `Salir` real (`SignOutAsync`)
+- [ ] Poner `[Authorize(Roles = ...)]` en **todos** los controladores, según la sección 8
+- [ ] `_Layout`: elegir la barra según el rol cuando la vista no define `Menu`. `_NavCorredor` y `_NavOrganizacion`: mostrar las iniciales reales. Login: el selector de equipos del registro sale de la base
+
+**Corredor**
+- [ ] `Corredor/Perfil` con `PerfilViewModel` (stats, equipo, inscripciones pendientes, resultados y últimas actividades)
+- [ ] `Corredor/Ver/{id}`: el perfil público de otro corredor
+- [ ] Actividades: crear, editar y eliminar, con `ActividadViewModel`, sus validaciones y el ajuste de `KmsTotales` (11.4). Solo el dueño puede editar o eliminar
+- [ ] `Feed` + like/unlike (11.5)
+- [ ] `Amigos`: búsqueda, agregar y quitar (no a uno mismo ni duplicado)
+
+**Definición de terminado:**
+- Puedes registrar un corredor nuevo y una organización nueva, cerrar sesión y volver a entrar con los dos.
+- Como corredor, **no** puedes abrir `/Organizacion/Panel` (te manda al login), y viceversa.
+- Crear, editar y eliminar una actividad cambia los km de "Mi perfil".
+- Ninguna de **tus** vistas tiene ya un bloque `DATOS DE EJEMPLO`.
+- Los formularios con datos inválidos muestran el mensaje en rojo debajo del campo.
+
+---
+
+#### 🟨 Turno 3: Harold · Carreras, equipos, organizaciones y sponsors
+Lee primero las secciones **9**, **10** y **11.1**.
+
+**Carreras (lado corredor)**
+- [ ] `Carreras/Index`: listado real con la pestaña Abiertas/Terminadas, filtro por distancia y búsqueda `q` por nombre de carrera u organización
+- [ ] `Carreras/Detalle`: datos reales, categorías, organizadoras y sponsors. Si la carrera está Terminada, redirige a `Resultados`
+- [ ] `Inscribirse`: implementarlo **exactamente** como en 11.1. `CancelarInscripcion`: solo si la carrera está Abierta. La vista muestra "Inscrito · pendiente" o el botón según corresponda
+- [ ] `Carreras/Resultados`: ranking real por categoría, podio y "Tu resultado" (solo si el usuario corrió). Si la carrera está Abierta, redirige a `Detalle`
+- [ ] `Home/Index`: las 3 próximas carreras abiertas
+
+**Equipos y organizaciones**
+- [ ] `Equipos/Index`, `Equipos/Detalle`, crear (nombre único), unirse y salir
+- [ ] `Organizaciones/Index`: lista y detalle con lo que organiza y patrocina
+
+**Lado organización (lo simple)**
+- [ ] `Organizacion/Perfil`: editar nombre y actividad
+- [ ] `Organizacion/Vinculos`: lista real, agregar co-organizadora o sponsor (validaciones de 13) y quitar (la creadora no se puede quitar)
+
+**Definición de terminado:**
+- Con un corredor del seed: te inscribes en una carrera abierta, el perfil la muestra como pendiente, cancelas y desaparece.
+- Una carrera terminada del seed muestra el ranking real, y en ella **no** aparece el botón de inscribirse.
+- Un corredor sin categoría para su edad ve el mensaje de error y **no** queda inscrito.
+- Ninguna de **tus** vistas tiene ya un bloque `DATOS DE EJEMPLO`.
+
+---
+
+#### 🟥 Turno 4: Mauricio · Panel de la organización, reportes y entrega
+Lee primero las secciones **11.2**, **12**, **13** y **16**.
+
+**Gestión de carreras**
+- [ ] `Organizacion/Panel`: carreras propias abiertas y terminadas, con número de inscritos
+- [ ] `Organizacion/Carrera/{id}`: inscritos por categoría y, si está terminada, el ranking con tiempo y ritmo
+- [ ] Crear y editar carrera con `CarreraFormViewModel` + lista de categorías: agregar y quitar filas, y todas las validaciones de 13 (rangos sin superponerse, fecha futura, etc.). Al crear, se guarda `OrgCarrera` con `EsCreadora = true`
+- [ ] `EliminarCarrera`: solo la creadora y solo si está Abierta (cascada)
+- [ ] `TerminarCarrera`: usar `SimulacionCarreraService` (hecho por Victor), sumar los km a cada inscrito y mostrar el mensaje
+
+**Reportes (15 pts)**
+- [ ] Reporte 1, Inscripciones y recaudación, con consulta real, los 3 filtros y los totales **calculados en el controlador o ViewModel, no en la vista** (12)
+- [ ] Reporte 2, Rendimiento, con consulta real y los filtros por carrera terminada y agrupación (12)
+
+**Entrega final**
+- [ ] Probar el recorrido completo de la presentación (registro → inscripción → terminar carrera → ranking → reportes) con los datos del seed
+- [ ] Buscar en todo el proyecto `DATOS DE EJEMPLO` y `TODO`: **no debe quedar ninguno**. Si queda alguno de otro turno, avísale al dueño o resuélvelo
+- [ ] Borrar código sin uso y verificar que compile **sin warnings**
+- [ ] Completar el README: integrantes con su usuario de GitHub, descripción de los 2 reportes y usuarios de prueba
+- [ ] Exportar el DER actualizado a imagen (mermaid.live) y juntarlo con el DER original y la tabla de cambios
+- [ ] **Último commit: borrar `collab.md`** (ver el recuadro al final de este archivo)
+- [ ] Armar el ZIP **sin** `bin/`, `obj/`, `.vs/` ni `collab.md`, desde el último commit
+
+**Definición de terminado:** toda la checklist de la sección 16 está marcada.
+
+---
+
+### 15.4 Registro de avance
+Cada uno completa **su fila** al terminar su turno. Si algo quedó a medias, se escribe acá, no se esconde.
+
+| Turno | Quién | Estado | Fecha | Último commit | Nota para el siguiente |
+|---|---|---|---|---|---|
+| 0 | Mateo | ✅ Terminado | 2026-10-26 | Crea proyecto MVC con vistas, navegación y guía del equipo | Están listas todas las vistas, controladores con `TODO`, CSS, DER actualizado y esta guía. Victor: empieza por la sección 7. |
+| 1 | Victor | ⏳ Pendiente | | | |
+| 2 | Nico | ⏳ Pendiente | | | |
+| 3 | Harold | ⏳ Pendiente | | | |
+| 4 | Mauricio | ⏳ Pendiente | | | |
+
+**Usuarios de prueba del seed** (los completa Victor):
+- Corredor: `____________` / `Prueba123!`
+- Organización: `____________` / `Prueba123!`
+
+**Problemas conocidos / cosas a medias** (cualquiera agrega acá):
+- _(nada por ahora)_
 
 ---
 
