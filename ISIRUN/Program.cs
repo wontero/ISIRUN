@@ -1,9 +1,24 @@
+using ISIRUN.Data;
+using ISIRUN.Services;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddDbContext<IsirunContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("IsirunDb")));
+
+builder.Services.AddScoped<SimulacionCarreraService>();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<IsirunContext>();
+    var simulacion = scope.ServiceProvider.GetRequiredService<SimulacionCarreraService>();
+    await SeedData.InicializarAsync(db, simulacion);
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

@@ -731,18 +731,18 @@ dotnet run --project ISIRUN
 #### 🟦 Turno 1: Victor · Base de datos
 Lee primero las secciones **7** y **11** completas.
 
-- [ ] Instalar los paquetes de EF Core y la herramienta `dotnet-ef` (7.1)
-- [ ] Crear las 11 entidades en `Models/` según `DER_actualizado.md` (7.2), con `[Required]`, `[StringLength]` y la navegación (`ICollection<...>`)
-- [ ] Crear `EstadosCarrera` con las constantes `Abierta` y `Terminada` (7.2)
-- [ ] Crear `Data/IsirunContext.cs` **copiando** la configuración de 7.3 (claves compuestas, emails únicos y `NoAction`)
-- [ ] Agregar la cadena de conexión a LocalDB y registrar el DbContext en `Program.cs` (7.4)
-- [ ] Crear la migración `Inicial` y comprobar que `dotnet ef database update` crea la base sin errores (7.5)
-- [ ] Crear la carpeta `Helpers/` con: `FormatoTiempo`, `FormatoRitmo` (11.3), `Edad(nacimiento, dia)` (11.1) e `Iniciales(nombre)` (sección 10, paso 5)
-- [ ] Crear `Services/SimulacionCarreraService.cs` con el método `Terminar` de 11.2 y registrarlo en `Program.cs` (`builder.Services.AddScoped<SimulacionCarreraService>()`)
-- [ ] Crear `Data/SeedData.cs` (7.6): 3 equipos, ~15 corredores, 3 organizaciones, 4 carreras (2 abiertas con inscritos y 2 **terminadas usando `SimulacionCarreraService`**), categorías, sponsors, co-organizadoras, actividades, likes y amistades. Las contraseñas se guardan con `PasswordHasher` (sección 8) y **todas** son `Prueba123!`
-- [ ] Ejecutar el seed al arrancar la app **solo si la base está vacía**
-- [ ] Crear `README.md` en la raíz con: nombre y descripción del proyecto, requisitos y pasos para crear la base y ejecutar (sección 16). Los demás lo van completando.
-- [ ] Anotar en el registro (15.4) **un correo de corredor y uno de organización** del seed, para que los demás puedan probar
+- [x] Instalar los paquetes de EF Core y la herramienta `dotnet-ef` (7.1)
+- [x] Crear las 11 entidades en `Models/` según `DER_actualizado.md` (7.2), con `[Required]`, `[StringLength]` y la navegación (`ICollection<...>`)
+- [x] Crear `EstadosCarrera` con las constantes `Abierta` y `Terminada` (7.2)
+- [x] Crear `Data/IsirunContext.cs` **copiando** la configuración de 7.3 (claves compuestas, emails únicos y `NoAction`)
+- [x] Agregar la cadena de conexión a LocalDB y registrar el DbContext en `Program.cs` (7.4)
+- [x] Crear la migración `Inicial` y comprobar que `dotnet ef database update` crea la base sin errores (7.5)
+- [x] Crear la carpeta `Helpers/` con: `FormatoTiempo`, `FormatoRitmo` (11.3), `Edad(nacimiento, dia)` (11.1) e `Iniciales(nombre)` (sección 10, paso 5)
+- [x] Crear `Services/SimulacionCarreraService.cs` con el método `Terminar` de 11.2 y registrarlo en `Program.cs` (`builder.Services.AddScoped<SimulacionCarreraService>()`)
+- [x] Crear `Data/SeedData.cs` (7.6): 3 equipos, ~15 corredores, 3 organizaciones, 4 carreras (2 abiertas con inscritos y 2 **terminadas usando `SimulacionCarreraService`**), categorías, sponsors, co-organizadoras, actividades, likes y amistades. Las contraseñas se guardan con `PasswordHasher` (sección 8) y **todas** son `Prueba123!`
+- [x] Ejecutar el seed al arrancar la app **solo si la base está vacía**
+- [x] Crear `README.md` en la raíz con: nombre y descripción del proyecto, requisitos y pasos para crear la base y ejecutar (sección 16). Los demás lo van completando.
+- [x] Anotar en el registro (15.4) **un correo de corredor y uno de organización** del seed, para que los demás puedan probar
 
 **Definición de terminado:**
 - Una persona que clona el repo y ejecuta `dotnet ef database update` + `dotnet run` obtiene la base creada **con datos**.
@@ -838,14 +838,14 @@ Cada uno completa **su fila** al terminar su turno. Si algo quedó a medias, se 
 | Turno | Quién | Estado | Fecha | Último commit | Nota para el siguiente |
 |---|---|---|---|---|---|
 | 0 | Mateo | ✅ Terminado | 2026-10-26 | Crea proyecto MVC con vistas, navegación y guía del equipo | Están listas todas las vistas, controladores con `TODO`, CSS, DER actualizado y esta guía. Victor: empieza por la sección 7. |
-| 1 | Victor | ⏳ Pendiente | | | |
+| 1 | Victor | ✅ Implementación terminada; falta commit/push manual | 2026-10-26 | Pendiente: Victor hará los commits manualmente | Base, migración Inicial, helpers, simulación, seed y README listos y verificados. Tras recibir los cambios publicados por Victor, Nico ejecuta dotnet ef database update --project ISIRUN y dotnet run --project ISIRUN. Los helpers están en IsirunHelpers; Terminar no suma km ni guarda: lo hace el llamador (ver SeedData). Las vistas conservan ejemplos. |
 | 2 | Nico | ⏳ Pendiente | | | |
 | 3 | Harold | ⏳ Pendiente | | | |
 | 4 | Mauricio | ⏳ Pendiente | | | |
 
-**Usuarios de prueba del seed** (los completa Victor):
-- Corredor: `____________` / `Prueba123!`
-- Organización: `____________` / `Prueba123!`
+**Usuarios de prueba del seed** (creados por Victor; el login real se implementa en el turno de Nico):
+- Corredor: `ana.rojas@isirun.test` / `Prueba123!`
+- Organización: `club.norte@isirun.test` / `Prueba123!`
 
 **Problemas conocidos / cosas a medias** (cualquiera agrega acá):
 - _(nada por ahora)_
