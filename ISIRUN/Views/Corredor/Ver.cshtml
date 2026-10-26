@@ -1,0 +1,69 @@
+@{
+    ViewData["Title"] = "Perfil de corredor";
+    ViewData["Nav"] = "amigos";
+
+    // DATOS DE EJEMPLO — reemplazar por @model PerfilPublicoViewModel
+    var resultados = new[]
+    {
+        new { IdCarrera = 4, Carrera = "10K Primavera", Tiempo = "0:38:40", Ranking = 1 },
+        new { IdCarrera = 5, Carrera = "Media Maratón Costanera", Tiempo = "1:29:55", Ranking = 2 },
+    };
+    var actividades = new[]
+    {
+        new { Nombre = "Tempo por la costanera", Fecha = "Hoy", Km = "10.0", Tiempo = "0:47:20", Tipo = "Calle" },
+        new { Nombre = "Cuestas", Fecha = "22 oct", Km = "9.4", Tiempo = "0:55:00", Tipo = "Trail" },
+    };
+}
+
+<main class="container">
+    <a class="back-link" asp-controller="Amigos" asp-action="Index">← Volver a amigos</a>
+    <section class="card lg">
+        <div class="row center">
+            <span class="avatar xl dark">DM</span>
+            <div class="grow stack tight">
+                <h1 class="page-title">Diego Muñoz</h1>
+                <p class="muted">Corredor desde ene 2024 · 25 años · Categoría 18–29 · <a class="strong" asp-controller="Equipos" asp-action="Detalle" asp-route-id="1">Runners del Norte</a></p>
+            </div>
+            <span class="badge badge-lime">✓ Amigos</span>
+        </div>
+    </section>
+
+    <section class="stats" aria-label="Estadísticas">
+        <div class="stat dark"><span class="label-upper">Kms totales</span><span class="stat-value">712.4</span></div>
+        <div class="stat"><span class="label-upper">Carreras corridas</span><span class="stat-value">11</span></div>
+        <div class="stat"><span class="label-upper">Mejor ranking</span><span class="stat-value">#1</span></div>
+    </section>
+
+    <div class="split">
+        <section class="card split-main">
+            <h2 class="section-title">Resultados</h2>
+            <div class="table-wrap">
+                <table class="table">
+                    <thead><tr><th scope="col">Carrera</th><th scope="col">Tiempo</th><th scope="col">Ranking</th></tr></thead>
+                    <tbody>
+                        @foreach (var r in resultados)
+                        {
+                            <tr>
+                                <td><a class="strong" asp-controller="Carreras" asp-action="Resultados" asp-route-id="@r.IdCarrera">@r.Carrera</a></td>
+                                <td class="nums">@r.Tiempo</td>
+                                <td class="rank">#@r.Ranking</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <section class="card split-side">
+            <h2 class="section-title">Actividades</h2>
+            <div>
+                @foreach (var a in actividades)
+                {
+                    <div class="activity">
+                        <div class="row center"><span class="strong grow">@a.Nombre</span><span class="muted xsmall">@a.Fecha</span></div>
+                        <div class="activity-meta"><span><strong>@a.Km</strong> km</span><span><strong>@a.Tiempo</strong></span><span>@a.Tipo</span></div>
+                    </div>
+                }
+            </div>
+        </section>
+    </div>
+</main>

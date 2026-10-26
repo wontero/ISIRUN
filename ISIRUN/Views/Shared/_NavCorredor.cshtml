@@ -1,0 +1,24 @@
+@{
+    // Cada vista indica su sección con ViewData["Nav"] = "perfil" | "feed" | "carreras" | "equipos" | "organizaciones" | "amigos"
+    var activo = ViewData["Nav"] as string;
+    string Clase(string seccion) => seccion == activo ? "nav-link active" : "nav-link";
+    string? Actual(string seccion) => seccion == activo ? "page" : null;
+}
+<header class="navbar">
+    <nav class="navbar-inner" aria-label="Principal">
+        <a class="brand" asp-controller="Corredor" asp-action="Perfil"><partial name="_Logo" />ISIRUN</a>
+        <div class="nav-links">
+            <a class="@Clase("perfil")" aria-current="@Actual("perfil")" asp-controller="Corredor" asp-action="Perfil">Mi perfil</a>
+            <a class="@Clase("feed")" aria-current="@Actual("feed")" asp-controller="Feed" asp-action="Index">Feed</a>
+            <a class="@Clase("carreras")" aria-current="@Actual("carreras")" asp-controller="Carreras" asp-action="Index">Carreras</a>
+            <a class="@Clase("equipos")" aria-current="@Actual("equipos")" asp-controller="Equipos" asp-action="Index">Equipos</a>
+            <a class="@Clase("organizaciones")" aria-current="@Actual("organizaciones")" asp-controller="Organizaciones" asp-action="Index">Organizaciones</a>
+            <a class="@Clase("amigos")" aria-current="@Actual("amigos")" asp-controller="Amigos" asp-action="Index">Amigos</a>
+        </div>
+        @* TODO (auth): iniciales del corredor logueado *@
+        <a class="avatar" asp-controller="Corredor" asp-action="Perfil" aria-label="Mi perfil">AR</a>
+        <form asp-controller="Cuenta" asp-action="Salir" method="post">
+            <button type="submit" class="nav-exit">Salir</button>
+        </form>
+    </nav>
+</header>

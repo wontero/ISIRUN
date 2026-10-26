@@ -1,0 +1,101 @@
+@{
+    ViewData["Title"] = "Crear cuenta";
+    ViewData["Menu"] = "ninguno";
+    // /Cuenta/Registro?tipo=Organizacion abre con "Organización" marcado (link del Inicio).
+    var esOrg = Context.Request.Query["tipo"] == "Organizacion";
+
+    // DATOS DE EJEMPLO — reemplazar por la lista de equipos de la base (SelectList).
+    var equipos = new[] { "Runners del Norte", "Los Madrugadores", "Corre Sur" };
+}
+
+<div class="auth">
+    <aside class="auth-aside">
+        <a class="brand" asp-controller="Home" asp-action="Index"><partial name="_Logo" />ISIRUN</a>
+        <h1 class="display-xl">Tu primer<br />kilómetro<br />empieza <span class="accent">aquí.</span></h1>
+        <ul class="auth-perks">
+            <li>✓ Inscríbete en carreras y sigue tu ranking</li>
+            <li>✓ Únete a un equipo</li>
+            <li>✓ ¿Organizas carreras? Crea una cuenta de organización</li>
+        </ul>
+    </aside>
+    <main class="auth-main">
+        @* TODO: cambiar por un RegistroViewModel y usar asp-for en cada input para la validación. *@
+        <form class="form auth-form" asp-controller="Cuenta" asp-action="Registro" method="post">
+            <h2 class="page-title">Crear cuenta</h2>
+            <div asp-validation-summary="ModelOnly"></div>
+
+            <fieldset class="plain">
+                <legend>Tipo de cuenta</legend>
+                <div class="grid-2">
+                    <label>
+                        <input class="chip-input" type="radio" name="Tipo" value="Corredor" checked="@(!esOrg)" />
+                        <span class="option-card"><span class="strong">Corredor</span><span class="muted">Corro y me inscribo</span></span>
+                    </label>
+                    <label>
+                        <input class="chip-input" type="radio" name="Tipo" value="Organizacion" checked="@esOrg" />
+                        <span class="option-card"><span class="strong">Organización</span><span class="muted">Organizo carreras</span></span>
+                    </label>
+                </div>
+            </fieldset>
+
+            @* Campos solo de corredor (site.js oculta/deshabilita según el tipo elegido) *@
+            <div class="form" data-tipo="Corredor">
+                <div class="field">
+                    <label for="Nombre">Nombre completo</label>
+                    <input id="Nombre" name="Nombre" class="input" autocomplete="name" placeholder="Ana Rojas" required />
+                </div>
+                <div class="row">
+                    <div class="field">
+                        <label for="FechaNac">Fecha de nacimiento</label>
+                        <input id="FechaNac" name="FechaNac" type="date" class="input" required />
+                    </div>
+                    <div class="field">
+                        <label for="IdEquipo">Equipo <span class="muted">(opcional)</span></label>
+                        <select id="IdEquipo" name="IdEquipo" class="input">
+                            <option value="">Sin equipo por ahora</option>
+                            @foreach (var e in equipos)
+                            {
+                                <option>@e</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            @* Campos solo de organización *@
+            <div class="form" data-tipo="Organizacion">
+                <div class="field">
+                    <label for="NombreOrganizacion">Nombre de la organización</label>
+                    <input id="NombreOrganizacion" name="NombreOrganizacion" class="input" autocomplete="organization" placeholder="Club Atlético Norte" required />
+                </div>
+                <div class="field">
+                    <label for="Actividad">Actividad</label>
+                    <input id="Actividad" name="Actividad" class="input" placeholder="Club deportivo, municipalidad, tienda…" required />
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="Email">Correo</label>
+                <input id="Email" name="Email" type="email" class="input" autocomplete="email" required />
+            </div>
+            <div class="row">
+                <div class="field">
+                    <label for="Contrasena">Contraseña</label>
+                    <input id="Contrasena" name="Contrasena" type="password" class="input" autocomplete="new-password" minlength="8" required />
+                    <span class="hint">Mínimo 8 caracteres.</span>
+                </div>
+                <div class="field">
+                    <label for="ConfirmarContrasena">Confirmar contraseña</label>
+                    <input id="ConfirmarContrasena" name="ConfirmarContrasena" type="password" class="input" autocomplete="new-password" required />
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-lime btn-lg btn-block">Crear cuenta</button>
+            <p class="muted">¿Ya tienes cuenta? <a class="strong" asp-action="Login">Entrar</a></p>
+        </form>
+    </main>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

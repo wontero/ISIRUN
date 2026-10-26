@@ -1,0 +1,79 @@
+@{
+    ViewData["Title"] = "Amigos";
+    ViewData["Nav"] = "amigos";
+    var busqueda = ViewData["Busqueda"] as string;
+
+    // DATOS DE EJEMPLO — reemplazar por @model AmigosViewModel
+    var resultados = new[]
+    {
+        new { Id = 8, Iniciales = "CR", Nombre = "Carlos Reyes", Equipo = "Trail Cordillera", EsAmigo = false },
+        new { Id = 3, Iniciales = "CV", Nombre = "Camila Vera", Equipo = "Los Madrugadores", EsAmigo = true },
+    };
+    var amigos = new[]
+    {
+        new { Id = 2, Iniciales = "DM", Nombre = "Diego Muñoz", Kms = "712.4" },
+        new { Id = 3, Iniciales = "CV", Nombre = "Camila Vera", Kms = "533.0" },
+    };
+}
+
+<main class="container">
+    <h1 class="page-title">Amigos</h1>
+    <div class="split">
+        <section class="card split-side" aria-labelledby="buscar-t">
+            <h2 id="buscar-t" class="section-title">Buscar corredores</h2>
+            <form class="row tight" method="get" asp-action="Index" role="search">
+                <label for="q" class="sr-only">Nombre o correo</label>
+                <input id="q" name="q" type="search" class="input grow" placeholder="Nombre o correo" value="@busqueda" />
+                <button type="submit" class="btn btn-dark btn-lg">Buscar</button>
+            </form>
+            @if (!string.IsNullOrWhiteSpace(busqueda))
+            {
+                @foreach (var r in resultados)
+                {
+                    <div class="list-item">
+                        <span class="avatar">@r.Iniciales</span>
+                        <span class="info"><span class="strong">@r.Nombre</span><span class="muted xsmall">@r.Equipo</span></span>
+                        @if (r.EsAmigo)
+                        {
+                            <span class="badge badge-lime">✓ Amigos</span>
+                        }
+                        else
+                        {
+                            <form asp-action="Agregar" asp-route-id="@r.Id" method="post">
+                                <button type="submit" class="btn btn-outline btn-sm">+ Agregar</button>
+                            </form>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="muted small">Escribe un nombre o correo para buscar.</p>
+            }
+        </section>
+
+        <section class="card split-side" aria-labelledby="mis-t">
+            <h2 id="mis-t" class="section-title">Mis amigos <span class="muted">(@amigos.Length)</span></h2>
+            @foreach (var a in amigos)
+            {
+                <div class="list-item">
+                    <span class="avatar dark">@a.Iniciales</span>
+                    <span class="info"><span class="strong">@a.Nombre</span><span class="muted xsmall">@a.Kms km totales</span></span>
+                    <a class="btn btn-dark btn-sm" asp-controller="Corredor" asp-action="Ver" asp-route-id="@a.Id">Ver perfil</a>
+                    <button type="button" class="btn btn-danger-outline btn-sm" data-dialog-open="quitar-@a.Id">Quitar</button>
+                    <dialog id="quitar-@a.Id" class="confirm danger" aria-labelledby="quitar-@a.Id-t">
+                        <form class="stack" asp-action="Quitar" asp-route-id="@a.Id" method="post">
+                            <h2 id="quitar-@a.Id-t" class="section-title">¿Quitar a @a.Nombre?</h2>
+                            <p>Dejarás de ver sus actividades en tu feed.</p>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-outline" data-dialog-close>Cancelar</button>
+                                <button type="submit" class="btn btn-danger">Sí, quitar</button>
+                            </div>
+                        </form>
+                    </dialog>
+                </div>
+            }
+            @* Si no tiene amigos: <p class="empty">Aún no tienes amigos. Búscalos a la izquierda.</p> *@
+        </section>
+    </div>
+</main>

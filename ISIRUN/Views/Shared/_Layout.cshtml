@@ -1,0 +1,39 @@
+﻿@{
+    // "Menu" decide qué barra se muestra: "corredor", "org" o "ninguno" (landing, login, registro).
+    // TODO (auth): cuando exista login real, si la vista no lo define, elegir por rol:
+    //   User.IsInRole("Organizacion") ? "org" : "corredor"
+    var menu = ViewData["Menu"] as string ?? "corredor";
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] · ISIRUN</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    @if (menu == "corredor")
+    {
+        <partial name="_NavCorredor" />
+    }
+    else if (menu == "org")
+    {
+        <partial name="_NavOrganizacion" />
+    }
+
+    @if (menu != "ninguno")
+    {
+        <partial name="_Mensajes" />
+    }
+
+    @RenderBody()
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

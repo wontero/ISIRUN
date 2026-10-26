@@ -1,0 +1,57 @@
+@{
+    ViewData["Title"] = "Equipos";
+    ViewData["Nav"] = "equipos";
+
+    // DATOS DE EJEMPLO — reemplazar por @model IEnumerable<EquipoResumenViewModel>
+    var equipos = new[]
+    {
+        new { Id = 1, Iniciales = "RN", Nombre = "Runners del Norte", Desde = "feb 2024", Miembros = 18, Kms = "6.240", EsMio = true },
+        new { Id = 2, Iniciales = "LM", Nombre = "Los Madrugadores", Desde = "jun 2024", Miembros = 12, Kms = "4.105", EsMio = false },
+        new { Id = 3, Iniciales = "CS", Nombre = "Corre Sur", Desde = "ene 2025", Miembros = 24, Kms = "8.930", EsMio = false },
+    };
+}
+
+<main class="container">
+    <div class="page-head">
+        <div>
+            <h1 class="page-title">Equipos</h1>
+            <p class="muted">Corre acompañado. Cada corredor puede estar en un equipo.</p>
+        </div>
+        <button type="button" class="btn btn-dark btn-lg" data-dialog-open="crear-equipo">+ Crear equipo</button>
+    </div>
+
+    <dialog id="crear-equipo" class="confirm" aria-labelledby="crear-equipo-t">
+        <form class="stack" asp-action="Crear" method="post">
+            <h2 id="crear-equipo-t" class="section-title">Crear equipo</h2>
+            <div class="field">
+                <label for="nombre">Nombre del equipo</label>
+                <input id="nombre" name="nombre" class="input" placeholder="Ej. Los Madrugadores" maxlength="100" required />
+                <span class="hint">La fecha de creación se guarda sola. Al crearlo pasas a ser miembro.</span>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline" data-dialog-close>Cancelar</button>
+                <button type="submit" class="btn btn-lime">Crear</button>
+            </div>
+        </form>
+    </dialog>
+
+    <div class="grid-cards">
+        @foreach (var e in equipos)
+        {
+            <a class="card" asp-action="Detalle" asp-route-id="@e.Id">
+                <div class="row center">
+                    <span class="tile dark lg">@e.Iniciales</span>
+                    <span class="stack tight grow"><span class="race-name">@e.Nombre</span><span class="muted xsmall">Desde @e.Desde</span></span>
+                </div>
+                <div class="row">
+                    <span class="stack tight"><span class="label-upper">Miembros</span><span class="metric-value">@e.Miembros</span></span>
+                    <span class="stack tight"><span class="label-upper">Kms del equipo</span><span class="metric-value">@e.Kms</span></span>
+                </div>
+                @if (e.EsMio)
+                {
+                    <span class="badge badge-lime">Tu equipo</span>
+                }
+            </a>
+        }
+    </div>
+</main>

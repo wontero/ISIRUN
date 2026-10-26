@@ -1,0 +1,84 @@
+@{
+    ViewData["Title"] = "Carreras";
+    ViewData["Nav"] = "carreras";
+    var estado = ViewData["Estado"] as string ?? "abiertas";
+    var distancia = ViewData["Distancia"] as string;
+    var terminadas = estado == "terminadas";
+
+    // DATOS DE EJEMPLO — reemplazar por @model CarrerasIndexViewModel (lista ya filtrada por el controlador)
+    var abiertas = new[]
+    {
+        new { Id = 1, Distancia = "42K", Fecha = "15 NOV", Nombre = "Maratón de la Ciudad", Organiza = "Club Atlético Norte", Info = "5 categorías de edad", Precio = "$35" },
+        new { Id = 2, Distancia = "10K", Fecha = "22 NOV", Nombre = "10K Nocturna del Parque", Organiza = "Municipalidad", Info = "4 categorías de edad", Precio = "$15" },
+        new { Id = 3, Distancia = "21K", Fecha = "06 DIC", Nombre = "Trail Cerro Alto", Organiza = "Andes Outdoor", Info = "4 categorías de edad", Precio = "$25" },
+    };
+    var cerradas = new[]
+    {
+        new { Id = 4, Distancia = "10K", Fecha = "12 OCT", Nombre = "10K Primavera", Organiza = "Club Atlético Norte", Info = "214 corredores en el ranking", Precio = "" },
+        new { Id = 5, Distancia = "21K", Fecha = "28 SEP", Nombre = "Media Maratón Costanera", Organiza = "Corre Sur", Info = "356 corredores en el ranking", Precio = "" },
+    };
+    var lista = terminadas ? cerradas : abiertas;
+    var distancias = new[] { "5", "10", "21", "42" };
+}
+
+<main class="container">
+    <div class="page-head">
+        <div>
+            <h1 class="page-title">Carreras</h1>
+            <p class="muted">@(terminadas ? "Carreras finalizadas con su ranking oficial." : "Carreras con inscripción abierta.")</p>
+        </div>
+        <nav class="segmented" aria-label="Estado de la carrera">
+            <a class="@(!terminadas ? "active" : null)" aria-current="@(!terminadas ? "page" : null)" asp-route-estado="abiertas" asp-route-distancia="@distancia">Abiertas</a>
+            <a class="@(terminadas ? "active" : null)" aria-current="@(terminadas ? "page" : null)" asp-route-estado="terminadas" asp-route-distancia="@distancia">Terminadas</a>
+        </nav>
+    </div>
+
+    <form class="filter-bar" method="get" asp-action="Index">
+        <input type="hidden" name="estado" value="@estado" />
+        <div class="field wide">
+            <label for="q" class="sr-only">Buscar carrera</label>
+            <input id="q" name="q" type="search" class="input sm" placeholder="Buscar por nombre u organización" value="@Context.Request.Query["q"]" />
+        </div>
+        <div class="chips" role="group" aria-label="Distancia">
+            <a class="chip @(distancia == null ? "active" : null)" asp-route-estado="@estado">Todas</a>
+            @foreach (var d in distancias)
+            {
+                <a class="chip @(distancia == d ? "active" : null)" asp-route-estado="@estado" asp-route-distancia="@d">@(d)K</a>
+            }
+        </div>
+        <button type="submit" class="btn btn-dark">Buscar</button>
+    </form>
+
+    @if (lista.Length == 0)
+    {
+        <p class="empty">No hay carreras con ese filtro.</p>
+    }
+
+    <div class="grid-cards">
+        @foreach (var c in lista)
+        {
+            <a class="race-card @(terminadas ? "done" : null)" asp-action="@(terminadas ? "Resultados" : "Detalle")" asp-route-id="@c.Id">
+                <div class="race-card-top">
+                    <span class="race-dist">@c.Distancia</span>
+                    @if (terminadas)
+                    {
+                        <span class="badge badge-dark">Terminada · @c.Fecha</span>
+                    }
+                    else
+                    {
+                        <span class="race-date">@c.Fecha</span>
+                    }
+                </div>
+                <div class="race-card-body">
+                    <span class="race-name">@c.Nombre</span>
+                    <span class="muted small">Organiza: @c.Organiza</span>
+                    <span class="muted small">@c.Info</span>
+                    <div class="race-foot">
+                        <span class="race-price">@c.Precio</span>
+                        <span class="strong small">@(terminadas ? "Ver ranking" : "Inscribirme") →</span>
+                    </div>
+                </div>
+            </a>
+        }
+    </div>
+</main>

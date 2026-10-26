@@ -1,0 +1,7 @@
+@{
+    var actual = ViewContext.RouteData.Values["action"] as string;
+}
+<nav class="chips no-print" aria-label="Reportes">
+    <a class="chip sm @(actual == "Inscripciones" ? "active" : null)" aria-current="@(actual == "Inscripciones" ? "page" : null)" asp-controller="Reportes" asp-action="Inscripciones">Inscripciones y recaudación</a>
+    <a class="chip sm @(actual == "Rendimiento" ? "active" : null)" aria-current="@(actual == "Rendimiento" ? "page" : null)" asp-controller="Reportes" asp-action="Rendimiento">Rendimiento por categoría y equipo</a>
+</nav>

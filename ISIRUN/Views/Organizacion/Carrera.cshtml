@@ -1,0 +1,108 @@
+@{
+    ViewData["Title"] = "Gestionar carrera";
+    ViewData["Menu"] = "org";
+    ViewData["Nav"] = "panel";
+
+    // DATOS DE EJEMPLO — reemplazar por @model GestionCarreraViewModel
+    var id = 2;
+    var terminada = false; // TODO: Carrera.Estado == "Terminada"
+    var totalInscritos = 214;
+    var categorias = new[] { new { Id = 1, Rango = "18–29", Inscritos = 64 }, new { Id = 2, Rango = "30–39", Inscritos = 81 }, new { Id = 3, Rango = "40–49", Inscritos = 47 }, new { Id = 4, Rango = "50+", Inscritos = 22 } };
+    var categoriaActual = int.TryParse(Context.Request.Query["categoria"], out var cat) ? cat : 1;
+    // Si está terminada: Tiempo, Ritmo y Ranking vienen llenos y la lista viene ordenada por Ranking.
+    var filas = new[]
+    {
+        new { Ranking = (int?)null, Corredor = "Diego Muñoz", Equipo = "Runners del Norte", Tiempo = (string?)null, Ritmo = (string?)null },
+        new { Ranking = (int?)null, Corredor = "Camila Vera", Equipo = "Los Madrugadores", Tiempo = (string?)null, Ritmo = (string?)null },
+        new { Ranking = (int?)null, Corredor = "Ana Rojas", Equipo = "Runners del Norte", Tiempo = (string?)null, Ritmo = (string?)null },
+    };
+}
+
+<main class="container">
+    <a class="back-link" asp-action="Panel">← Mis carreras</a>
+
+    <section class="hero-card">
+        <div class="grow stack">
+            @if (terminada)
+            {
+                <span class="badge badge-light">Terminada</span>
+            }
+            else
+            {
+                <span class="badge badge-lime">Inscripción abierta</span>
+            }
+            <h1 class="page-title">10K Nocturna del Parque</h1>
+            <p class="sub">Sáb 22 nov 2026 · 20:00 · 10 km · $15 · @totalInscritos inscritos</p>
+        </div>
+        @if (!terminada)
+        {
+            <div class="row tight">
+                <a class="btn btn-on-dark" asp-action="EditarCarrera" asp-route-id="@id">Editar</a>
+                <a class="btn btn-on-dark" asp-action="Vinculos" asp-route-id="@id">Sponsors y co-organizadores</a>
+                <button type="button" class="btn btn-danger-on-dark" data-dialog-open="eliminar-carrera">Eliminar</button>
+                <button type="button" class="btn btn-lime" data-dialog-open="terminar-carrera">Terminar carrera</button>
+            </div>
+        }
+    </section>
+
+    <dialog id="terminar-carrera" class="confirm" aria-labelledby="terminar-t">
+        <form class="stack" asp-action="TerminarCarrera" asp-route-id="@id" method="post">
+            <h2 id="terminar-t" class="section-title">¿Terminar la carrera?</h2>
+            <p>Se cierran las inscripciones y se generan los tiempos de los @totalInscritos inscritos para armar el ranking de cada categoría. Esta acción no se puede deshacer.</p>
+            <p class="alert alert-info">Simulación: cada corredor recibe un ritmo aleatorio entre 4:00 y 8:00 min/km. En una carrera real los tiempos llegarían del chip de cronometraje.</p>
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline" data-dialog-close>Cancelar</button>
+                <button type="submit" class="btn btn-dark">Sí, terminar y generar ranking</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="eliminar-carrera" class="confirm danger" aria-labelledby="eliminar-t">
+        <form class="stack" asp-action="EliminarCarrera" asp-route-id="@id" method="post">
+            <h2 id="eliminar-t" class="section-title">¿Eliminar esta carrera?</h2>
+            <p>Se eliminarán la carrera, sus @categorias.Length categorías, los vínculos con sponsors y co-organizadores, y las @totalInscritos inscripciones. No se puede deshacer.</p>
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline" data-dialog-close>Cancelar</button>
+                <button type="submit" class="btn btn-danger">Sí, eliminar carrera</button>
+            </div>
+        </form>
+    </dialog>
+
+    <section class="card">
+        <div class="page-head">
+            <h2 class="section-title">@(terminada ? "Ranking" : "Inscritos")</h2>
+            <nav class="chips" aria-label="Categoría">
+                @foreach (var c in categorias)
+                {
+                    <a class="chip sm @(c.Id == categoriaActual ? "active" : null)" aria-current="@(c.Id == categoriaActual ? "page" : null)" asp-route-id="@id" asp-route-categoria="@c.Id">@c.Rango · @c.Inscritos</a>
+                }
+            </nav>
+        </div>
+        <div class="table-wrap">
+            <table class="table">
+                <thead><tr><th scope="col">Pos.</th><th scope="col">Corredor</th><th scope="col">Equipo</th><th scope="col">Tiempo</th><th scope="col">Ritmo</th></tr></thead>
+                <tbody>
+                    @foreach (var f in filas)
+                    {
+                        <tr>
+                            <td class="rank">@(f.Ranking?.ToString() ?? "—")</td>
+                            <td class="strong">@f.Corredor</td>
+                            <td class="muted">@f.Equipo</td>
+                            <td>
+                                @if (f.Tiempo is null)
+                                {
+                                    <span class="badge badge-pending">Pendiente</span>
+                                }
+                                else
+                                {
+                                    <strong class="nums">@f.Tiempo</strong>
+                                }
+                            </td>
+                            <td class="muted nums">@(f.Ritmo is null ? "—" : f.Ritmo + " /km")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>

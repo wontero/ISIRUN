@@ -1,0 +1,15 @@
+@* Mensajes de confirmación/error después de una acción.
+   En el controlador: TempData["Exito"] = "Carrera creada."; o TempData["Error"] = "...";
+   y después return RedirectToAction(...). *@
+@if (TempData["Exito"] is string exito)
+{
+    <div class="container flash" role="status">
+        <p class="alert alert-success">@exito</p>
+    </div>
+}
+@if (TempData["Error"] is string error)
+{
+    <div class="container flash" role="alert">
+        <p class="alert alert-error">@error</p>
+    </div>
+}

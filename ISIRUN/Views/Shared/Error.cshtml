@@ -1,0 +1,15 @@
+﻿@model ErrorViewModel
+@{
+    ViewData["Title"] = "Error";
+    ViewData["Menu"] = "ninguno";
+}
+
+<main class="container xs">
+    <h1 class="page-title">Algo salió mal</h1>
+    <p class="alert alert-error">Ocurrió un error al procesar tu solicitud. Intenta de nuevo.</p>
+    @if (Model.ShowRequestId)
+    {
+        <p class="muted small">Código de la solicitud: <code>@Model.RequestId</code></p>
+    }
+    <a class="btn btn-dark" asp-controller="Home" asp-action="Index">Volver al inicio</a>
+</main>

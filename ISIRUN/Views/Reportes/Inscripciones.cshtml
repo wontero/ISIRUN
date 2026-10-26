@@ -1,0 +1,117 @@
+@{
+    ViewData["Title"] = "Reporte de inscripciones y recaudación";
+    ViewData["Menu"] = "org";
+    ViewData["Nav"] = "reportes";
+    var estado = ViewData["EstadoFiltro"] as string;
+
+    // DATOS DE EJEMPLO — reemplazar por @model ReporteInscripcionesViewModel (ver collab.md, "Reporte 1").
+    // Las columnas de categoría salen de las categorías existentes; acá se fijan 4 para el ejemplo.
+    var rangos = new[] { "18–29", "30–39", "40–49", "50+" };
+    var filas = new[]
+    {
+        new { Carrera = "Maratón de la Ciudad", Fecha = "15 nov 2026", Estado = "Abierta", PorCategoria = new[] { 90, 140, 98, 48 }, Precio = 35m },
+        new { Carrera = "10K Nocturna del Parque", Fecha = "22 nov 2026", Estado = "Abierta", PorCategoria = new[] { 64, 81, 47, 22 }, Precio = 15m },
+        new { Carrera = "10K Primavera", Fecha = "12 oct 2026", Estado = "Terminada", PorCategoria = new[] { 72, 70, 48, 24 }, Precio = 15m },
+    };
+    var totalesCat = rangos.Select((_, i) => filas.Sum(f => f.PorCategoria[i])).ToArray();
+    var totalInscritos = totalesCat.Sum();
+    var totalRecaudado = filas.Sum(f => f.PorCategoria.Sum() * f.Precio);
+    var maxCat = Math.Max(1, totalesCat.Max());
+    string Dinero(decimal v) => "$" + v.ToString("N0", new System.Globalization.CultureInfo("es-CL"));
+}
+
+<main class="container">
+    <partial name="_NavReportes" />
+
+    <div class="page-head">
+        <div>
+            <h1 class="page-title">Inscripciones y recaudación</h1>
+            <p class="muted">Cuántos corredores se inscribieron en tus carreras, en qué categorías y cuánto se recaudó.</p>
+        </div>
+        <button type="button" class="btn btn-outline no-print" onclick="window.print()">Imprimir</button>
+    </div>
+
+    <form class="filter-bar" method="get" asp-action="Inscripciones">
+        <div class="field">
+            <label for="desde">Desde</label>
+            <input id="desde" name="desde" type="date" class="input sm" value="@Context.Request.Query["desde"]" />
+        </div>
+        <div class="field">
+            <label for="hasta">Hasta</label>
+            <input id="hasta" name="hasta" type="date" class="input sm" value="@Context.Request.Query["hasta"]" />
+        </div>
+        <div class="field">
+            <label for="estado">Estado</label>
+            <select id="estado" name="estado" class="input sm">
+                <option value="" selected="@(string.IsNullOrEmpty(estado))">Todas</option>
+                <option value="Abierta" selected="@(estado == "Abierta")">Abiertas</option>
+                <option value="Terminada" selected="@(estado == "Terminada")">Terminadas</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-dark">Filtrar</button>
+        <a class="btn btn-outline" asp-action="Inscripciones">Limpiar</a>
+    </form>
+
+    <section class="stats" aria-label="Resumen">
+        <div class="stat"><span class="label-upper">Carreras</span><span class="stat-value">@filas.Length</span></div>
+        <div class="stat"><span class="label-upper">Inscritos</span><span class="stat-value">@totalInscritos</span></div>
+        <div class="stat dark"><span class="label-upper">Recaudación total</span><span class="stat-value">@Dinero(totalRecaudado)</span></div>
+        <div class="stat"><span class="label-upper">Promedio por carrera</span><span class="stat-value">@Dinero(filas.Length == 0 ? 0 : Math.Round(totalRecaudado / filas.Length))</span></div>
+    </section>
+
+    <div class="split">
+        <section class="card split-main" aria-labelledby="det-t">
+            <h2 id="det-t" class="section-title">Detalle por carrera</h2>
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Carrera</th><th scope="col">Fecha</th><th scope="col">Estado</th>
+                            @foreach (var r in rangos) { <th scope="col" class="num">@r</th> }
+                            <th scope="col" class="num">Inscritos</th><th scope="col" class="num">Recaudado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var f in filas)
+                        {
+                            <tr>
+                                <th scope="row">@f.Carrera</th>
+                                <td class="muted">@f.Fecha</td>
+                                <td>@f.Estado</td>
+                                @foreach (var n in f.PorCategoria) { <td class="num">@n</td> }
+                                <td class="num strong">@f.PorCategoria.Sum()</td>
+                                <td class="num strong">@Dinero(f.PorCategoria.Sum() * f.Precio)</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th scope="row" colspan="3">Total</th>
+                            @foreach (var t in totalesCat) { <td class="num">@t</td> }
+                            <td class="num">@totalInscritos</td>
+                            <td class="num">@Dinero(totalRecaudado)</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            @if (filas.Length == 0)
+            {
+                <p class="empty">No hay carreras en ese período.</p>
+            }
+        </section>
+
+        <section class="card split-side" aria-labelledby="cat-t">
+            <h2 id="cat-t" class="section-title">Inscritos por categoría</h2>
+            @for (var i = 0; i < rangos.Length; i++)
+            {
+                var pct = totalesCat[i] * 100 / maxCat;
+                var share = totalInscritos == 0 ? 0 : totalesCat[i] * 100 / totalInscritos;
+                <div class="stack tight">
+                    <div class="row center small"><span class="strong grow">@rangos[i]</span><span class="nums"><strong>@totalesCat[i]</strong> · @share%</span></div>
+                    @* Única excepción a "nada de style=": el ancho de la barra es un dato calculado. *@
+                    <div class="bar"><span style="width: @pct%"></span></div>
+                </div>
+            }
+        </section>
+    </div>
+</main>

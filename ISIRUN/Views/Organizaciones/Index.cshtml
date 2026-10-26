@@ -1,0 +1,59 @@
+@{
+    ViewData["Title"] = "Organizaciones";
+    ViewData["Nav"] = "organizaciones";
+
+    // DATOS DE EJEMPLO — reemplazar por @model OrganizacionesIndexViewModel
+    var organizaciones = new[]
+    {
+        new { Id = 1, Iniciales = "MU", Nombre = "Municipalidad", Actividad = "Gobierno local" },
+        new { Id = 2, Iniciales = "CA", Nombre = "Club Atlético Norte", Actividad = "Club deportivo" },
+        new { Id = 3, Iniciales = "DA", Nombre = "Deportes Andes", Actividad = "Tienda de artículos deportivos" },
+    };
+    var seleccionada = int.TryParse(Context.Request.Query["id"], out var sel) ? sel : 1;
+    var actual = organizaciones.FirstOrDefault(o => o.Id == seleccionada) ?? organizaciones[0];
+    var organiza = new[] { new { IdCarrera = 2, Carrera = "10K Nocturna del Parque", Detalle = "Desde 01 ago 2026 · equipo de 25" } };
+    var patrocina = new[] { new { IdCarrera = 3, Carrera = "Trail Cerro Alto", Detalle = "Indumentaria · $1.200" } };
+}
+
+<main class="container">
+    <div class="page-head">
+        <div>
+            <h1 class="page-title">Organizaciones</h1>
+            <p class="muted">Quienes organizan y patrocinan las carreras.</p>
+        </div>
+    </div>
+
+    <div class="split">
+        <nav class="split-side stack tight" aria-label="Lista de organizaciones">
+            @foreach (var o in organizaciones)
+            {
+                <a class="list-item @(o.Id == actual.Id ? "soft" : null)" aria-current="@(o.Id == actual.Id ? "page" : null)" asp-route-id="@o.Id">
+                    <span class="tile @(o.Id == actual.Id ? "lime" : null)">@o.Iniciales</span>
+                    <span class="info"><span class="strong">@o.Nombre</span><span class="muted xsmall">@o.Actividad</span></span>
+                </a>
+            }
+        </nav>
+
+        <section class="card lg split-main">
+            <div class="row center">
+                <span class="tile dark lg">@actual.Iniciales</span>
+                <div class="grow stack tight"><h2 class="page-title">@actual.Nombre</h2><span class="muted">@actual.Actividad</span></div>
+            </div>
+            <div class="stack tight">
+                <h3 class="label-upper">Organiza</h3>
+                @foreach (var c in organiza)
+                {
+                    <a class="list-item" asp-controller="Carreras" asp-action="Detalle" asp-route-id="@c.IdCarrera"><span class="info"><span class="strong">@c.Carrera</span><span class="muted xsmall">@c.Detalle</span></span></a>
+                }
+                @* Si está vacío: <p class="empty">Todavía no organiza ninguna carrera.</p> *@
+            </div>
+            <div class="stack tight">
+                <h3 class="label-upper">Patrocina</h3>
+                @foreach (var c in patrocina)
+                {
+                    <a class="list-item" asp-controller="Carreras" asp-action="Detalle" asp-route-id="@c.IdCarrera"><span class="info"><span class="strong">@c.Carrera</span><span class="muted xsmall">@c.Detalle</span></span></a>
+                }
+            </div>
+        </section>
+    </div>
+</main>

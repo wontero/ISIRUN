@@ -1,0 +1,92 @@
+﻿@{
+    ViewData["Title"] = "Inicio";
+    ViewData["Menu"] = "ninguno";
+
+    // DATOS DE EJEMPLO — reemplazar por @model con las 3 próximas carreras abiertas.
+    var proximas = new[]
+    {
+        new { Id = 1, Distancia = "42K", Fecha = "15 NOV", Nombre = "Maratón de la Ciudad", Organiza = "Club Atlético Norte", Precio = "$35" },
+        new { Id = 2, Distancia = "10K", Fecha = "22 NOV", Nombre = "10K Nocturna del Parque", Organiza = "Municipalidad", Precio = "$15" },
+        new { Id = 3, Distancia = "21K", Fecha = "06 DIC", Nombre = "Trail Cerro Alto", Organiza = "Andes Outdoor", Precio = "$25" },
+    };
+}
+
+<header class="landing-header">
+    <nav class="navbar-inner" aria-label="Principal">
+        <a class="brand" asp-controller="Home" asp-action="Index"><partial name="_Logo" />ISIRUN</a>
+        <div class="grow"></div>
+        <a class="nav-link" asp-controller="Carreras" asp-action="Index">Carreras</a>
+        <a class="nav-link" asp-controller="Cuenta" asp-action="Login">Entrar</a>
+        <a class="btn btn-lime" asp-controller="Cuenta" asp-action="Registro">Crear cuenta</a>
+    </nav>
+    <section class="landing-hero">
+        <div>
+            <p class="eyebrow">Tu comunidad de running</p>
+            <h1 class="display-xl">Corre.<br />Compite.<br />Mejora.</h1>
+            <p>Registra tus entrenamientos, inscríbete en carreras, únete a un equipo y sigue tu ranking en tu categoría de edad.</p>
+            <div class="row tight">
+                <a class="btn btn-lime btn-lg" asp-controller="Cuenta" asp-action="Registro">Empezar gratis</a>
+                <a class="btn btn-on-dark btn-lg" asp-controller="Carreras" asp-action="Index">Ver carreras</a>
+            </div>
+        </div>
+        <div class="grow">
+            <div class="bib">
+                <div class="row center">
+                    <span class="label-upper grow">Dorsal</span>
+                    <span class="badge badge-lime">Inscrito</span>
+                </div>
+                <div class="bib-number">0427</div>
+                <div class="bib-foot">
+                    <span class="race-name">10K Nocturna del Parque</span>
+                    <span class="muted small">Categoría 18–29 · 22 nov 2026</span>
+                </div>
+            </div>
+        </div>
+    </section>
+</header>
+
+<main class="container">
+    <section class="stack" aria-labelledby="proximas">
+        <div class="page-head">
+            <h2 id="proximas" class="page-title">Próximas carreras</h2>
+            <a class="strong" asp-controller="Carreras" asp-action="Index">Ver todas</a>
+        </div>
+        <div class="grid-cards">
+            @foreach (var c in proximas)
+            {
+                <a class="race-card" asp-controller="Carreras" asp-action="Detalle" asp-route-id="@c.Id">
+                    <div class="race-card-top">
+                        <span class="race-dist">@c.Distancia</span>
+                        <span class="race-date">@c.Fecha</span>
+                    </div>
+                    <div class="race-card-body">
+                        <span class="race-name">@c.Nombre</span>
+                        <span class="muted small">Organiza: @c.Organiza</span>
+                        <span class="race-price">@c.Precio</span>
+                    </div>
+                </a>
+            }
+        </div>
+    </section>
+
+    <section class="stack" aria-labelledby="como">
+        <h2 id="como" class="page-title">Cómo funciona</h2>
+        <ol class="steps">
+            <li class="card"><span class="step-num">1</span><span class="strong">Crea tu cuenta</span><span class="muted">Regístrate con tu nombre, fecha de nacimiento y correo. Tu categoría de edad se asigna sola.</span></li>
+            <li class="card"><span class="step-num">2</span><span class="strong">Inscríbete</span><span class="muted">Elige una carrera, revisa categorías, premios y organizadores, e inscríbete en un clic.</span></li>
+            <li class="card"><span class="step-num">3</span><span class="strong">Sigue tu ranking</span><span class="muted">Cuando la carrera termina, ves tu tiempo y tu posición dentro de tu categoría.</span></li>
+        </ol>
+    </section>
+
+    <section class="hero-card" aria-labelledby="orgs">
+        <div class="grow stack tight">
+            <h2 id="orgs" class="page-title">¿Organizas carreras?</h2>
+            <p class="sub">Crea una cuenta de organización: publica tus carreras, suma sponsors y, al terminar, publica el ranking de todos los inscritos.</p>
+        </div>
+        <a class="btn btn-lime btn-lg" asp-controller="Cuenta" asp-action="Registro" asp-route-tipo="Organizacion">Registrar organización</a>
+    </section>
+</main>
+
+<footer class="site-footer">
+    <div><span class="section-title">ISIRUN</span><span>Proyecto de Programación Web</span></div>
+</footer>

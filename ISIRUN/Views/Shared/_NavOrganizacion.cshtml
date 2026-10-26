@@ -1,0 +1,23 @@
+@{
+    // ViewData["Nav"] = "panel" | "crear" | "reportes" | "perfil"
+    var activo = ViewData["Nav"] as string;
+    string Clase(string seccion) => seccion == activo ? "nav-link active" : "nav-link";
+    string? Actual(string seccion) => seccion == activo ? "page" : null;
+}
+<header class="navbar">
+    <nav class="navbar-inner" aria-label="Principal">
+        <a class="brand" asp-controller="Organizacion" asp-action="Panel"><partial name="_Logo" />ISIRUN</a>
+        <span class="nav-tag">Organización</span>
+        <div class="nav-links">
+            <a class="@Clase("panel")" aria-current="@Actual("panel")" asp-controller="Organizacion" asp-action="Panel">Mis carreras</a>
+            <a class="@Clase("crear")" aria-current="@Actual("crear")" asp-controller="Organizacion" asp-action="CrearCarrera">Crear carrera</a>
+            <a class="@Clase("reportes")" aria-current="@Actual("reportes")" asp-controller="Reportes" asp-action="Inscripciones">Reportes</a>
+            <a class="@Clase("perfil")" aria-current="@Actual("perfil")" asp-controller="Organizacion" asp-action="Perfil">Perfil de la organización</a>
+        </div>
+        @* TODO (auth): iniciales de la organización logueada *@
+        <a class="avatar square" asp-controller="Organizacion" asp-action="Perfil" aria-label="Perfil de la organización">CA</a>
+        <form asp-controller="Cuenta" asp-action="Salir" method="post">
+            <button type="submit" class="nav-exit">Salir</button>
+        </form>
+    </nav>
+</header>

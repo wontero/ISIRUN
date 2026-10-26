@@ -1,0 +1,31 @@
+@{
+    ViewData["Title"] = "Perfil de la organización";
+    ViewData["Menu"] = "org";
+    ViewData["Nav"] = "perfil";
+}
+
+<main class="container xs">
+    <h1 class="page-title">Perfil de la organización</h1>
+    @* TODO: @model PerfilOrganizacionViewModel y asp-for en los inputs (vienen con los datos actuales). *@
+    <form class="card lg form" asp-action="Perfil" method="post">
+        <div asp-validation-summary="ModelOnly"></div>
+        <div class="field">
+            <label for="Nombre">Nombre</label>
+            <input id="Nombre" name="Nombre" class="input" value="Club Atlético Norte" maxlength="150" required />
+        </div>
+        <div class="field">
+            <label for="Actividad">Actividad</label>
+            <input id="Actividad" name="Actividad" class="input" value="Club deportivo" maxlength="150" required />
+            <span class="hint">A qué se dedica. Se muestra debajo del nombre.</span>
+        </div>
+        <p class="alert alert-info">El nombre y la actividad aparecen en el detalle de cada carrera que organizas o patrocinas.</p>
+        <div class="form-actions">
+            <a class="btn btn-outline btn-lg" asp-action="Panel">Cancelar</a>
+            <button type="submit" class="btn btn-dark btn-lg">Guardar cambios</button>
+        </div>
+    </form>
+</main>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
