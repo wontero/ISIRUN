@@ -1,61 +1,52 @@
+@model EquipoDetalleViewModel
 @{
-    ViewData["Title"] = "Runners del Norte";
+    ViewData["Title"] = Model.Nombre;
     ViewData["Nav"] = "equipos";
-
-    // DATOS DE EJEMPLO — reemplazar por @model EquipoDetalleViewModel
-    var id = 1;
-    var soyMiembro = true;
-    var miembros = new[]
-    {
-        new { Id = 2, Nombre = "Diego Muñoz", Categoria = "18–29", Kms = "712.4" },
-        new { Id = 1, Nombre = "Ana Rojas", Categoria = "18–29", Kms = "486.2" },
-        new { Id = 7, Nombre = "Jorge Ibáñez", Categoria = "50+", Kms = "301.9" },
-    };
 }
 
 <main class="container">
     <a class="back-link" asp-action="Index">← Todos los equipos</a>
     <section class="hero-card">
-        <span class="tile lime xl">RN</span>
+        <span class="tile lime xl">@Model.Iniciales</span>
         <div class="grow stack tight">
-            <h1 class="page-title">Runners del Norte</h1>
-            <p class="sub">Creado el 12 feb 2024</p>
+            <h1 class="page-title">@Model.Nombre</h1>
+            <p class="sub">Creado el @Formatos.FechaCorta(Model.FechaCreacion)</p>
         </div>
-        @if (soyMiembro)
+        @if (Model.SoyMiembro)
         {
-            <form asp-action="Salir" asp-route-id="@id" method="post" class="stack tight">
+            <form asp-action="Salir" asp-route-id="@Model.Id" method="post" class="stack tight">
                 <span class="badge badge-lime">Eres miembro</span>
                 <button type="submit" class="btn btn-on-dark">Salir del equipo</button>
             </form>
         }
         else
         {
-            <form asp-action="Unirse" asp-route-id="@id" method="post">
+            <form asp-action="Unirse" asp-route-id="@Model.Id" method="post">
                 <button type="submit" class="btn btn-lime btn-lg">Unirme al equipo</button>
             </form>
         }
     </section>
 
     <section class="stats" aria-label="Estadísticas del equipo">
-        <div class="stat"><span class="label-upper">Miembros</span><span class="stat-value">18</span></div>
-        <div class="stat"><span class="label-upper">Kms del equipo</span><span class="stat-value">6.240</span></div>
-        <div class="stat"><span class="label-upper">Podios</span><span class="stat-value">9</span></div>
+        <div class="stat"><span class="label-upper">Miembros</span><span class="stat-value">@Model.TotalMiembros</span></div>
+        <div class="stat"><span class="label-upper">Kms del equipo</span><span class="stat-value">@Formatos.Km(Model.KmsEquipo)</span></div>
+        <div class="stat"><span class="label-upper">Podios</span><span class="stat-value">@Model.Podios</span></div>
     </section>
 
     <section class="card">
         <h2 class="section-title">Miembros</h2>
         <div class="table-wrap">
             <table class="table">
-                <thead><tr><th scope="col">#</th><th scope="col">Corredor</th><th scope="col">Categoría</th><th scope="col" class="num">Kms totales</th></tr></thead>
+                <thead><tr><th scope="col">#</th><th scope="col">Corredor</th><th scope="col">Edad</th><th scope="col" class="num">Kms totales</th></tr></thead>
                 <tbody>
                     @{ var pos = 1; }
-                    @foreach (var m in miembros)
+                    @foreach (var m in Model.Miembros)
                     {
                         <tr>
                             <td class="rank">@(pos++)</td>
                             <td><a class="strong" asp-controller="Corredor" asp-action="Ver" asp-route-id="@m.Id">@m.Nombre</a></td>
                             <td class="muted">@m.Categoria</td>
-                            <td class="num strong">@m.Kms</td>
+                            <td class="num strong">@Formatos.Km(m.Kms)</td>
                         </tr>
                     }
                 </tbody>

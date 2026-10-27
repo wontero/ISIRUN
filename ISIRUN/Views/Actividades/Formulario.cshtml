@@ -1,59 +1,65 @@
+@model ActividadViewModel
 @{
     // Misma vista para Crear y Editar (el controlador pone ViewData["Editando"] = true al editar).
     var editando = ViewData["Editando"] is true;
     ViewData["Title"] = editando ? "Editar actividad" : "Registrar actividad";
     ViewData["Nav"] = "perfil";
-    var tipos = new[] { "Calle", "Pista", "Trail", "Cinta" };
 }
 
 <main class="container narrow">
     <a class="back-link" asp-controller="Corredor" asp-action="Perfil">← Volver a mi perfil</a>
     <h1 class="page-title">@ViewData["Title"]</h1>
 
-    @* TODO: @model ActividadViewModel y asp-for en cada campo (genera name, id y validación). *@
-    <form class="card lg form" asp-action="@(editando ? "Editar" : "Crear")" method="post">
+    <form class="card lg form" asp-action="@(editando ? "Editar" : "Crear")" asp-route-id="@(editando ? Model.IdActividad.ToString() : null)" method="post">
         <div asp-validation-summary="ModelOnly"></div>
 
         <div class="field">
-            <label for="Nombre">Nombre de la actividad</label>
-            <input id="Nombre" name="Nombre" class="input" placeholder="Ej. Fondo largo del domingo" required />
+            <label asp-for="Nombre">Nombre de la actividad</label>
+            <input asp-for="Nombre" class="input" placeholder="Ej. Fondo largo del domingo" required />
+            <span asp-validation-for="Nombre"></span>
         </div>
 
         <fieldset class="plain">
             <legend>Tipo</legend>
             <div class="chips">
-                @foreach (var t in tipos)
+                @foreach (var t in ActividadViewModel.Tipos)
                 {
                     <label>
-                        <input class="chip-input" type="radio" name="Tipo" value="@t" checked="@(t == "Calle")" />
+                        <input class="chip-input" type="radio" name="Tipo" value="@t" checked="@(t == Model.Tipo)" />
                         <span class="chip">@t</span>
                     </label>
                 }
             </div>
+            <span asp-validation-for="Tipo"></span>
         </fieldset>
 
         <div class="row">
             <div class="field">
-                <label for="DistanciaKm">Distancia (km)</label>
-                <input id="DistanciaKm" name="DistanciaKm" type="number" step="0.01" min="0.01" class="input big" placeholder="10.0" required />
+                <label asp-for="DistanciaKm">Distancia (km)</label>
+                <input asp-for="DistanciaKm" type="number" step="0.01" min="0.01" class="input big" placeholder="10.0" required />
+                <span asp-validation-for="DistanciaKm"></span>
             </div>
             <div class="field">
-                <label for="Tiempo">Tiempo (hh:mm:ss)</label>
-                <input id="Tiempo" name="Tiempo" class="input big" inputmode="numeric" pattern="[0-9]{1,2}:[0-5][0-9]:[0-5][0-9]" placeholder="0:52:30" required />
+                <label asp-for="Tiempo">Tiempo (hh:mm:ss)</label>
+                <input asp-for="Tiempo" class="input big" inputmode="numeric" pattern="[0-9]{1,2}:[0-5][0-9]:[0-5][0-9]" placeholder="0:52:30" required />
+                <span asp-validation-for="Tiempo"></span>
             </div>
             <div class="field">
-                <label for="Fecha">Fecha</label>
-                <input id="Fecha" name="Fecha" type="date" class="input big" required />
+                <label asp-for="Fecha">Fecha</label>
+                <input asp-for="Fecha" type="date" class="input big" required />
+                <span asp-validation-for="Fecha"></span>
             </div>
         </div>
 
         <div class="field">
-            <label for="Descripcion">Descripción</label>
-            <textarea id="Descripcion" name="Descripcion" rows="3" class="input" placeholder="¿Cómo te fue?"></textarea>
+            <label asp-for="Descripcion">Descripción</label>
+            <textarea asp-for="Descripcion" rows="3" class="input" placeholder="¿Cómo te fue?"></textarea>
+            <span asp-validation-for="Descripcion"></span>
         </div>
         <div class="field">
-            <label for="Notas">Notas privadas <span class="muted">(solo tú las ves)</span></label>
-            <textarea id="Notas" name="Notas" rows="2" class="input"></textarea>
+            <label asp-for="Notas">Notas privadas <span class="muted">(solo tú las ves)</span></label>
+            <textarea asp-for="Notas" rows="2" class="input"></textarea>
+            <span asp-validation-for="Notas"></span>
         </div>
 
         <div class="form-actions">

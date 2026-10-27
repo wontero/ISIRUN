@@ -1,8 +1,8 @@
 ﻿@{
     // "Menu" decide qué barra se muestra: "corredor", "org" o "ninguno" (landing, login, registro).
-    // TODO (auth): cuando exista login real, si la vista no lo define, elegir por rol:
-    //   User.IsInRole("Organizacion") ? "org" : "corredor"
-    var menu = ViewData["Menu"] as string ?? "corredor";
+    // Si la vista no lo define (por ejemplo, las páginas públicas de carreras), se elige por rol.
+    var menu = ViewData["Menu"] as string
+        ?? (User.IsInRole(Roles.Organizacion) ? "org" : "corredor");
 }
 <!DOCTYPE html>
 <html lang="es">

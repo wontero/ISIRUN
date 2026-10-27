@@ -1,23 +1,9 @@
+@model ReporteInscripcionesViewModel
 @{
     ViewData["Title"] = "Reporte de inscripciones y recaudación";
     ViewData["Menu"] = "org";
     ViewData["Nav"] = "reportes";
-    var estado = ViewData["EstadoFiltro"] as string;
-
-    // DATOS DE EJEMPLO — reemplazar por @model ReporteInscripcionesViewModel (ver collab.md, "Reporte 1").
-    // Las columnas de categoría salen de las categorías existentes; acá se fijan 4 para el ejemplo.
-    var rangos = new[] { "18–29", "30–39", "40–49", "50+" };
-    var filas = new[]
-    {
-        new { Carrera = "Maratón de la Ciudad", Fecha = "15 nov 2026", Estado = "Abierta", PorCategoria = new[] { 90, 140, 98, 48 }, Precio = 35m },
-        new { Carrera = "10K Nocturna del Parque", Fecha = "22 nov 2026", Estado = "Abierta", PorCategoria = new[] { 64, 81, 47, 22 }, Precio = 15m },
-        new { Carrera = "10K Primavera", Fecha = "12 oct 2026", Estado = "Terminada", PorCategoria = new[] { 72, 70, 48, 24 }, Precio = 15m },
-    };
-    var totalesCat = rangos.Select((_, i) => filas.Sum(f => f.PorCategoria[i])).ToArray();
-    var totalInscritos = totalesCat.Sum();
-    var totalRecaudado = filas.Sum(f => f.PorCategoria.Sum() * f.Precio);
-    var maxCat = Math.Max(1, totalesCat.Max());
-    string Dinero(decimal v) => "$" + v.ToString("N0", new System.Globalization.CultureInfo("es-CL"));
+    var estado = Model.Estado;
 }
 
 <main class="container">
@@ -34,11 +20,11 @@
     <form class="filter-bar" method="get" asp-action="Inscripciones">
         <div class="field">
             <label for="desde">Desde</label>
-            <input id="desde" name="desde" type="date" class="input sm" value="@Context.Request.Query["desde"]" />
+            <input id="desde" name="desde" type="date" class="input sm" value="@Model.Desde?.ToString("yyyy-MM-dd")" />
         </div>
         <div class="field">
             <label for="hasta">Hasta</label>
-            <input id="hasta" name="hasta" type="date" class="input sm" value="@Context.Request.Query["hasta"]" />
+            <input id="hasta" name="hasta" type="date" class="input sm" value="@Model.Hasta?.ToString("yyyy-MM-dd")" />
         </div>
         <div class="field">
             <label for="estado">Estado</label>
@@ -53,10 +39,10 @@
     </form>
 
     <section class="stats" aria-label="Resumen">
-        <div class="stat"><span class="label-upper">Carreras</span><span class="stat-value">@filas.Length</span></div>
-        <div class="stat"><span class="label-upper">Inscritos</span><span class="stat-value">@totalInscritos</span></div>
-        <div class="stat dark"><span class="label-upper">Recaudación total</span><span class="stat-value">@Dinero(totalRecaudado)</span></div>
-        <div class="stat"><span class="label-upper">Promedio por carrera</span><span class="stat-value">@Dinero(filas.Length == 0 ? 0 : Math.Round(totalRecaudado / filas.Length))</span></div>
+        <div class="stat"><span class="label-upper">Carreras</span><span class="stat-value">@Model.Filas.Count</span></div>
+        <div class="stat"><span class="label-upper">Inscritos</span><span class="stat-value">@Model.TotalInscritos</span></div>
+        <div class="stat dark"><span class="label-upper">Recaudación total</span><span class="stat-value">@Presentacion.Monto(Model.TotalRecaudado)</span></div>
+        <div class="stat"><span class="label-upper">Promedio por carrera</span><span class="stat-value">@Presentacion.Monto(Model.PromedioPorCarrera)</span></div>
     </section>
 
     <div class="split">
@@ -67,34 +53,34 @@
                     <thead>
                         <tr>
                             <th scope="col">Carrera</th><th scope="col">Fecha</th><th scope="col">Estado</th>
-                            @foreach (var r in rangos) { <th scope="col" class="num">@r</th> }
+                            @foreach (var r in Model.Rangos) { <th scope="col" class="num">@r</th> }
                             <th scope="col" class="num">Inscritos</th><th scope="col" class="num">Recaudado</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var f in filas)
+                        @foreach (var f in Model.Filas)
                         {
                             <tr>
                                 <th scope="row">@f.Carrera</th>
-                                <td class="muted">@f.Fecha</td>
+                                <td class="muted">@Formatos.FechaCorta(f.Fecha)</td>
                                 <td>@f.Estado</td>
-                                @foreach (var n in f.PorCategoria) { <td class="num">@n</td> }
-                                <td class="num strong">@f.PorCategoria.Sum()</td>
-                                <td class="num strong">@Dinero(f.PorCategoria.Sum() * f.Precio)</td>
+                                @foreach (var n in f.InscritosPorRango) { <td class="num">@n</td> }
+                                <td class="num strong">@f.Inscritos</td>
+                                <td class="num strong">@Presentacion.Monto(f.Recaudado)</td>
                             </tr>
                         }
                     </tbody>
                     <tfoot>
                         <tr>
                             <th scope="row" colspan="3">Total</th>
-                            @foreach (var t in totalesCat) { <td class="num">@t</td> }
-                            <td class="num">@totalInscritos</td>
-                            <td class="num">@Dinero(totalRecaudado)</td>
+                            @foreach (var t in Model.TotalesPorCategoria) { <td class="num">@t.Inscritos</td> }
+                            <td class="num">@Model.TotalInscritos</td>
+                            <td class="num">@Presentacion.Monto(Model.TotalRecaudado)</td>
                         </tr>
                     </tfoot>
                 </table>
             </div>
-            @if (filas.Length == 0)
+            @if (Model.Filas.Count == 0)
             {
                 <p class="empty">No hay carreras en ese período.</p>
             }
@@ -102,14 +88,12 @@
 
         <section class="card split-side" aria-labelledby="cat-t">
             <h2 id="cat-t" class="section-title">Inscritos por categoría</h2>
-            @for (var i = 0; i < rangos.Length; i++)
+            @foreach (var b in Model.TotalesPorCategoria)
             {
-                var pct = totalesCat[i] * 100 / maxCat;
-                var share = totalInscritos == 0 ? 0 : totalesCat[i] * 100 / totalInscritos;
                 <div class="stack tight">
-                    <div class="row center small"><span class="strong grow">@rangos[i]</span><span class="nums"><strong>@totalesCat[i]</strong> · @share%</span></div>
+                    <div class="row center small"><span class="strong grow">@b.Rango</span><span class="nums"><strong>@b.Inscritos</strong> · @b.Participacion%</span></div>
                     @* Única excepción a "nada de style=": el ancho de la barra es un dato calculado. *@
-                    <div class="bar"><span style="width: @pct%"></span></div>
+                    <div class="bar"><span style="width: @b.PorcentajeBarra%"></span></div>
                 </div>
             }
         </section>

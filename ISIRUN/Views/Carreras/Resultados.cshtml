@@ -1,19 +1,7 @@
+@model CarreraResultadosViewModel
 @{
-    ViewData["Title"] = "10K Primavera · Ranking";
+    ViewData["Title"] = $"{Model.Nombre} · Ranking";
     ViewData["Nav"] = "carreras";
-
-    // DATOS DE EJEMPLO — reemplazar por @model CarreraResultadosViewModel
-    var id = 4;
-    var categorias = new[] { new { Id = 1, Rango = "18–29" }, new { Id = 2, Rango = "30–39" }, new { Id = 3, Rango = "40–49" }, new { Id = 4, Rango = "50+" } };
-    var categoriaActual = int.TryParse(Context.Request.Query["categoria"], out var cat) ? cat : 1;
-    var ranking = new[]
-    {
-        new { Pos = 1, Corredor = "Diego Muñoz", Equipo = "Runners del Norte", Tiempo = "0:40:12", Ritmo = "4:01", Premio = "1° · $100", EsYo = false },
-        new { Pos = 2, Corredor = "Camila Vera", Equipo = "Los Madrugadores", Tiempo = "0:42:45", Ritmo = "4:16", Premio = "2° · $50", EsYo = false },
-        new { Pos = 3, Corredor = "Matías Rojas", Equipo = "Corre Sur", Tiempo = "0:44:30", Ritmo = "4:27", Premio = "3° · medalla", EsYo = false },
-        new { Pos = 4, Corredor = "Valentina Díaz", Equipo = "Pista Libre", Tiempo = "0:47:58", Ritmo = "4:47", Premio = "", EsYo = false },
-        new { Pos = 5, Corredor = "Ana Rojas", Equipo = "Runners del Norte", Tiempo = "0:51:05", Ritmo = "5:06", Premio = "", EsYo = true },
-    };
 }
 
 <section class="race-hero">
@@ -22,15 +10,17 @@
         <div class="row center">
             <div class="grow stack">
                 <span class="badge badge-light">Terminada</span>
-                <h1 class="page-title">10K Primavera</h1>
-                <div class="meta"><span>Dom 12 oct 2026</span><span>10 km</span><span>Organiza: Club Atlético Norte</span><span>214 corredores</span></div>
+                <h1 class="page-title">@Model.Nombre</h1>
+                <div class="meta"><span>@Model.FechaTexto</span><span>@Model.DistanciaTexto</span><span>Organiza: @Model.Organiza</span><span>@Model.TotalCorredores corredores</span></div>
             </div>
-            @* Mostrar solo si el corredor logueado participó *@
-            <div class="result-box">
-                <span class="label-upper">Tu resultado</span>
-                <span class="big">#5 · 0:51:05</span>
-                <span class="small strong">Categoría 18–29 · 5:06 /km</span>
-            </div>
+            @if (Model.MiResultado != null)
+            {
+                <div class="result-box">
+                    <span class="label-upper">Tu resultado</span>
+                    <span class="big">#@Model.MiResultado.Pos · @Model.MiResultado.Tiempo</span>
+                    <span class="small strong">Categoría @Model.MiResultado.Categoria · @Model.MiResultado.Ritmo /km</span>
+                </div>
+            }
         </div>
     </div>
 </section>
@@ -39,15 +29,15 @@
     <div class="page-head">
         <h2 class="section-title">Ranking por categoría</h2>
         <nav class="chips" aria-label="Categoría">
-            @foreach (var c in categorias)
+            @foreach (var c in Model.Categorias)
             {
-                <a class="chip sm @(c.Id == categoriaActual ? "active" : null)" aria-current="@(c.Id == categoriaActual ? "page" : null)" asp-route-id="@id" asp-route-categoria="@c.Id">@c.Rango</a>
+                <a class="chip sm @(c.Id == Model.CategoriaActual ? "active" : null)" aria-current="@(c.Id == Model.CategoriaActual ? "page" : null)" asp-route-id="@Model.Id" asp-route-categoria="@c.Id">@c.Rango</a>
             }
         </nav>
     </div>
 
     <section class="stats" aria-label="Podio">
-        @foreach (var r in ranking.Take(3))
+        @foreach (var r in Model.Ranking.Take(3))
         {
             <div class="stat">
                 <span class="label-upper">@r.Premio</span>
@@ -62,7 +52,7 @@
             <table class="table">
                 <thead><tr><th scope="col">Pos.</th><th scope="col">Corredor</th><th scope="col">Equipo</th><th scope="col">Tiempo</th><th scope="col">Ritmo</th></tr></thead>
                 <tbody>
-                    @foreach (var r in ranking)
+                    @foreach (var r in Model.Ranking)
                     {
                         <tr class="@(r.EsYo ? "me" : null)">
                             <td class="rank">@r.Pos</td>
@@ -75,6 +65,10 @@
                 </tbody>
             </table>
         </div>
+        @if (Model.Ranking.Count == 0)
+        {
+            <p class="empty">No hay resultados en esta categoría.</p>
+        }
         <p class="muted xsmall">Tiempos simulados al terminar la carrera (ritmos entre 4:00 y 8:00 min/km). En una carrera real vendrían del chip de cronometraje.</p>
     </section>
 </main>

@@ -1,19 +1,7 @@
+@model AmigosViewModel
 @{
     ViewData["Title"] = "Amigos";
     ViewData["Nav"] = "amigos";
-    var busqueda = ViewData["Busqueda"] as string;
-
-    // DATOS DE EJEMPLO — reemplazar por @model AmigosViewModel
-    var resultados = new[]
-    {
-        new { Id = 8, Iniciales = "CR", Nombre = "Carlos Reyes", Equipo = "Trail Cordillera", EsAmigo = false },
-        new { Id = 3, Iniciales = "CV", Nombre = "Camila Vera", Equipo = "Los Madrugadores", EsAmigo = true },
-    };
-    var amigos = new[]
-    {
-        new { Id = 2, Iniciales = "DM", Nombre = "Diego Muñoz", Kms = "712.4" },
-        new { Id = 3, Iniciales = "CV", Nombre = "Camila Vera", Kms = "533.0" },
-    };
 }
 
 <main class="container">
@@ -23,12 +11,12 @@
             <h2 id="buscar-t" class="section-title">Buscar corredores</h2>
             <form class="row tight" method="get" asp-action="Index" role="search">
                 <label for="q" class="sr-only">Nombre o correo</label>
-                <input id="q" name="q" type="search" class="input grow" placeholder="Nombre o correo" value="@busqueda" />
+                <input id="q" name="q" type="search" class="input grow" placeholder="Nombre o correo" value="@Model.Busqueda" />
                 <button type="submit" class="btn btn-dark btn-lg">Buscar</button>
             </form>
-            @if (!string.IsNullOrWhiteSpace(busqueda))
+            @if (!string.IsNullOrWhiteSpace(Model.Busqueda))
             {
-                @foreach (var r in resultados)
+                @foreach (var r in Model.Resultados)
                 {
                     <div class="list-item">
                         <span class="avatar">@r.Iniciales</span>
@@ -45,6 +33,10 @@
                         }
                     </div>
                 }
+                @if (Model.Resultados.Count == 0)
+                {
+                    <p class="muted small">No encontramos corredores con ese nombre o correo.</p>
+                }
             }
             else
             {
@@ -53,12 +45,12 @@
         </section>
 
         <section class="card split-side" aria-labelledby="mis-t">
-            <h2 id="mis-t" class="section-title">Mis amigos <span class="muted">(@amigos.Length)</span></h2>
-            @foreach (var a in amigos)
+            <h2 id="mis-t" class="section-title">Mis amigos <span class="muted">(@Model.Amigos.Count)</span></h2>
+            @foreach (var a in Model.Amigos)
             {
                 <div class="list-item">
                     <span class="avatar dark">@a.Iniciales</span>
-                    <span class="info"><span class="strong">@a.Nombre</span><span class="muted xsmall">@a.Kms km totales</span></span>
+                    <span class="info"><span class="strong">@a.Nombre</span><span class="muted xsmall">@Formatos.Km(a.Kms) km totales</span></span>
                     <a class="btn btn-dark btn-sm" asp-controller="Corredor" asp-action="Ver" asp-route-id="@a.Id">Ver perfil</a>
                     <button type="button" class="btn btn-danger-outline btn-sm" data-dialog-open="quitar-@a.Id">Quitar</button>
                     <dialog id="quitar-@a.Id" class="confirm danger" aria-labelledby="quitar-@a.Id-t">
@@ -73,7 +65,10 @@
                     </dialog>
                 </div>
             }
-            @* Si no tiene amigos: <p class="empty">Aún no tienes amigos. Búscalos a la izquierda.</p> *@
+            @if (Model.Amigos.Count == 0)
+            {
+                <p class="empty">Aún no tienes amigos. Búscalos a la izquierda.</p>
+            }
         </section>
     </div>
 </main>

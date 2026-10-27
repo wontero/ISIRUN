@@ -1,38 +1,28 @@
+@model PanelOrganizacionViewModel
 @{
     ViewData["Title"] = "Mis carreras";
     ViewData["Menu"] = "org";
     ViewData["Nav"] = "panel";
-
-    // DATOS DE EJEMPLO — reemplazar por @model PanelOrganizacionViewModel
-    var abiertas = new[]
-    {
-        new { Id = 2, Distancia = "10K", Nombre = "10K Nocturna del Parque", Fecha = "22 nov 2026", Rol = "Co-organizadora con Municipalidad", Inscritos = 214 },
-        new { Id = 1, Distancia = "42K", Nombre = "Maratón de la Ciudad", Fecha = "15 nov 2026", Rol = "Organizadora", Inscritos = 376 },
-    };
-    var terminadas = new[]
-    {
-        new { Id = 4, Distancia = "10K", Nombre = "10K Primavera", Fecha = "12 oct 2026", Ganador = "Diego Muñoz (0:40:12)" },
-    };
 }
 
 <main class="container">
     <div class="page-head">
         <div>
-            <p class="muted strong">Club Atlético Norte · Club deportivo</p>
+            <p class="muted strong">@Model.Nombre · @Model.Actividad</p>
             <h1 class="page-title">Mis carreras</h1>
         </div>
         <a class="btn btn-lime btn-lg" asp-action="CrearCarrera">+ Crear carrera</a>
     </div>
 
     <section class="stats" aria-label="Resumen">
-        <div class="stat dark"><span class="label-upper">Abiertas</span><span class="stat-value">@abiertas.Length</span></div>
-        <div class="stat"><span class="label-upper">Inscritos en abiertas</span><span class="stat-value">@abiertas.Sum(c => c.Inscritos)</span></div>
-        <div class="stat"><span class="label-upper">Terminadas</span><span class="stat-value">@terminadas.Length</span></div>
+        <div class="stat dark"><span class="label-upper">Abiertas</span><span class="stat-value">@Model.Abiertas.Count</span></div>
+        <div class="stat"><span class="label-upper">Inscritos en abiertas</span><span class="stat-value">@Model.InscritosEnAbiertas</span></div>
+        <div class="stat"><span class="label-upper">Terminadas</span><span class="stat-value">@Model.Terminadas.Count</span></div>
     </section>
 
     <section class="card" aria-labelledby="abiertas-t">
         <h2 id="abiertas-t" class="section-title">Abiertas</h2>
-        @foreach (var c in abiertas)
+        @foreach (var c in Model.Abiertas)
         {
             <div class="list-item">
                 <span class="tile dark lg">@c.Distancia</span>
@@ -41,18 +31,25 @@
                 <a class="btn btn-dark" asp-action="Carrera" asp-route-id="@c.Id">Gestionar</a>
             </div>
         }
-        @* Si no hay: <p class="empty">No tienes carreras abiertas. ¡Crea la primera!</p> *@
+        @if (Model.Abiertas.Count == 0)
+        {
+            <p class="empty">No tienes carreras abiertas. ¡Crea la primera!</p>
+        }
     </section>
 
     <section class="card" aria-labelledby="terminadas-t">
         <h2 id="terminadas-t" class="section-title">Terminadas</h2>
-        @foreach (var c in terminadas)
+        @foreach (var c in Model.Terminadas)
         {
             <div class="list-item soft">
                 <span class="tile lg">@c.Distancia</span>
                 <span class="info"><span class="strong">@c.Nombre</span><span class="muted small">@c.Fecha · Ganador: @c.Ganador</span></span>
                 <a class="btn btn-outline" asp-action="Carrera" asp-route-id="@c.Id">Ver ranking</a>
             </div>
+        }
+        @if (Model.Terminadas.Count == 0)
+        {
+            <p class="empty">Todavía no terminaste ninguna carrera.</p>
         }
     </section>
 </main>
