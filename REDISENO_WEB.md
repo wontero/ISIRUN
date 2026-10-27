@@ -1,6 +1,5 @@
 # ISIRUN Web: inventario de pantallas
 
-Diseño (canvas): https://claude.ai/artifact/Whv5rUFo6nQCHhfhUATXYw
 DER actualizado y explicación de los cambios: [DER_actualizado.md](DER_actualizado.md)
 Implementación: **ASP.NET Core MVC + Entity Framework Core**, según la rúbrica. Cada pantalla corresponde a una vista `.cshtml` con su acción en un controlador.
 

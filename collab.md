@@ -12,7 +12,7 @@
 
 > **Orden de trabajo: Victor → Nico → Harold → Mauricio, de a uno.** Tus tareas están en la [sección 15](#15-turnos-de-trabajo-git-y-registro-de-avance). Antes de empezar, lee el **registro de avance (15.4)** para saber en qué quedó la persona anterior.
 
-Lee este archivo **completo** antes de escribir una línea de código. Si usas una IA para programar, **pásale este archivo entero como contexto** antes de pedirle cualquier cosa (ver la sección 14).
+Lee este archivo **completo** antes de escribir una línea de código.
 
 ---
 
@@ -30,7 +30,7 @@ Lee este archivo **completo** antes de escribir una línea de código. Si usas u
 11. [Lógica de negocio importante](#11-lógica-de-negocio-importante)
 12. [Los 2 reportes](#12-los-2-reportes)
 13. [Validaciones y mensajes](#13-validaciones-y-mensajes)
-14. [Cómo usar la IA sin romper el proyecto](#14-cómo-usar-la-ia-sin-romper-el-proyecto)
+14. [Buenas prácticas al programar](#14-buenas-prácticas-al-programar)
 15. [Git: ramas, commits y reparto del trabajo](#15-git-ramas-commits-y-reparto-del-trabajo)
 16. [Checklist de entrega](#16-checklist-de-entrega)
 
@@ -65,7 +65,7 @@ Una app web de **carreras de running** con **dos tipos de cuenta**:
 ### Documentos de referencia (en la raíz del repo)
 - `REDISENO_WEB.md`: lista de todas las pantallas y qué hace cada una.
 - `DER_actualizado.md`: **el DER que hay que implementar**, más la tabla de cambios respecto del original (eso también se entrega).
-- Diseño visual en Claude (canvas): lo tiene Mateo. Las vistas del proyecto ya copian ese diseño, así que **no hace falta abrirlo para programar**.
+- Diseño visual: lo tiene Mateo. Las vistas del proyecto ya copian ese diseño, así que **no hace falta abrirlo para programar**.
 
 ---
 
@@ -82,7 +82,7 @@ Una app web de **carreras de running** con **dos tipos de cuenta**:
 | GitHub individual | 10 | **Cada uno** hace commits **propios**, con aportes reales y mensajes descriptivos. |
 | Pregunta individual | 10 | El profe le pregunta a **cada uno** algo del proyecto. **Tienes que entender lo que subiste.** |
 
-**80 pts son grupales y 20 individuales** (commits + pregunta). Si la IA hizo tu parte y no la entiendes, pierdes esos 20.
+**80 pts son grupales y 20 individuales** (commits + pregunta). Si subes código que no entiendes, pierdes esos 20.
 
 ---
 
@@ -652,26 +652,23 @@ Las vistas con formularios ya incluyen `_ValidationScriptsPartial`. Funciona sol
 
 ---
 
-## 14. Cómo usar la IA sin romper el proyecto
+## 14. Buenas prácticas al programar
 
-Está bien usar IA. **Pero eres responsable de lo que subes y te lo van a preguntar.**
+Eres responsable de lo que subes y te lo van a preguntar en la presentación.
 
-**Antes de pedirle algo:**
-1. Pásale **este archivo completo** y `DER_actualizado.md`.
-2. Pásale **solo los archivos que va a tocar** (el controlador, la vista, el modelo).
-3. Pide **una cosa chica a la vez** ("crea el ViewModel y conecta la vista de Equipos/Index"), no "haz todo el proyecto".
+**Al implementar una pantalla:**
+1. Lee este archivo y `DER_actualizado.md`.
+2. Cambia solo los archivos que tocan esa pantalla (controlador, vista, ViewModel).
+3. Haz **una cosa chica a la vez** (por ejemplo: ViewModel + conectar `Equipos/Index`), no todo el módulo de golpe.
 
-**Copia y pega este prompt al empezar:**
-> Estoy trabajando en un proyecto ASP.NET Core MVC (.NET 10) con EF Core. Te paso collab.md con las reglas del proyecto: síguelas al pie de la letra. En especial: no cambies el HTML ni las clases CSS de las vistas, no agregues Bootstrap ni estilos inline, no pongas lógica en las vistas, usa ViewModels, usa las entidades y el DbContext tal como están definidos, y después de un POST usa RedirectToAction con TempData["Exito"]. Solo modifica los archivos que te pido. La tarea es: ______
-
-**Después de que responda:**
+**Antes de commitear:**
 - [ ] `dotnet build` compila sin errores.
 - [ ] Abriste la pantalla en el navegador y funciona (incluido el caso de error).
-- [ ] La vista se ve **igual** que antes (no te cambió clases ni estructura).
-- [ ] No agregó paquetes NuGet, archivos raros ni código que no se usa.
-- [ ] **Puedes explicar cada línea en voz alta.** Si no, pregúntale a la IA "explícame esta línea" hasta que puedas. En la presentación no vas a tener IA.
+- [ ] La vista se ve **igual** que antes (mismas clases y estructura HTML).
+- [ ] No agregaste paquetes NuGet, archivos raros ni código que no se usa.
+- [ ] **Puedes explicar cada línea en voz alta.**
 
-**Señales de que la IA se fue por las ramas (rechaza la respuesta):** reescribe la vista entera, agrega Bootstrap, crea un "Repository pattern" con 5 interfaces, cambia nombres de entidades del DER, mete `style=` en el HTML, pone consultas a la base dentro de la `.cshtml`, o toca `site.css` sin que se lo pidas.
+**No hagas esto:** reescribir la vista entera, agregar Bootstrap, inventar un "Repository pattern" con muchas interfaces, cambiar nombres de entidades del DER, meter `style=` en el HTML, poner consultas a la base dentro de la `.cshtml`, o tocar `site.css` sin que haga falta.
 
 ---
 
@@ -783,19 +780,19 @@ Lee primero las secciones **8**, **10** y **13**.
 Lee primero las secciones **9**, **10** y **11.1**.
 
 **Carreras (lado corredor)**
-- [ ] `Carreras/Index`: listado real con la pestaña Abiertas/Terminadas, filtro por distancia y búsqueda `q` por nombre de carrera u organización
-- [ ] `Carreras/Detalle`: datos reales, categorías, organizadoras y sponsors. Si la carrera está Terminada, redirige a `Resultados`
-- [ ] `Inscribirse`: implementarlo **exactamente** como en 11.1. `CancelarInscripcion`: solo si la carrera está Abierta. La vista muestra "Inscrito · pendiente" o el botón según corresponda
-- [ ] `Carreras/Resultados`: ranking real por categoría, podio y "Tu resultado" (solo si el usuario corrió). Si la carrera está Abierta, redirige a `Detalle`
-- [ ] `Home/Index`: las 3 próximas carreras abiertas
+- [x] `Carreras/Index`: listado real con la pestaña Abiertas/Terminadas, filtro por distancia y búsqueda `q` por nombre de carrera u organización
+- [x] `Carreras/Detalle`: datos reales, categorías, organizadoras y sponsors. Si la carrera está Terminada, redirige a `Resultados`
+- [x] `Inscribirse`: implementarlo **exactamente** como en 11.1. `CancelarInscripcion`: solo si la carrera está Abierta. La vista muestra "Inscrito · pendiente" o el botón según corresponda
+- [x] `Carreras/Resultados`: ranking real por categoría, podio y "Tu resultado" (solo si el usuario corrió). Si la carrera está Abierta, redirige a `Detalle`
+- [x] `Home/Index`: las 3 próximas carreras abiertas
 
 **Equipos y organizaciones**
-- [ ] `Equipos/Index`, `Equipos/Detalle`, crear (nombre único), unirse y salir
-- [ ] `Organizaciones/Index`: lista y detalle con lo que organiza y patrocina
+- [x] `Equipos/Index`, `Equipos/Detalle`, crear (nombre único), unirse y salir
+- [x] `Organizaciones/Index`: lista y detalle con lo que organiza y patrocina
 
 **Lado organización (lo simple)**
-- [ ] `Organizacion/Perfil`: editar nombre y actividad
-- [ ] `Organizacion/Vinculos`: lista real, agregar co-organizadora o sponsor (validaciones de 13) y quitar (la creadora no se puede quitar)
+- [x] `Organizacion/Perfil`: editar nombre y actividad
+- [x] `Organizacion/Vinculos`: lista real, agregar co-organizadora o sponsor (validaciones de 13) y quitar (la creadora no se puede quitar)
 
 **Definición de terminado:**
 - Con un corredor del seed: te inscribes en una carrera abierta, el perfil la muestra como pendiente, cancelas y desaparece.
@@ -840,7 +837,7 @@ Cada uno completa **su fila** al terminar su turno. Si algo quedó a medias, se 
 | 0 | Mateo | ✅ Terminado | 2026-10-26 | Crea proyecto MVC con vistas, navegación y guía del equipo | Están listas todas las vistas, controladores con `TODO`, CSS, DER actualizado y esta guía. Victor: empieza por la sección 7. |
 | 1 | Victor | ✅ Implementación terminada; falta commit/push manual | 2026-10-26 | Pendiente: Victor hará los commits manualmente | Base, migración Inicial, helpers, simulación, seed y README listos y verificados. Tras recibir los cambios publicados por Victor, Nico ejecuta dotnet ef database update --project ISIRUN y dotnet run --project ISIRUN. Los helpers están en IsirunHelpers; Terminar no suma km ni guarda: lo hace el llamador (ver SeedData). Las vistas conservan ejemplos. |
 | 2 | Nico | ✅ Terminado | 2026-10-26 | Implementa el feed de amigos con likes y la búsqueda, alta y baja de amigos | Login real con cookies y roles (`Helpers/Roles.cs` y `User.ObtenerId()` en `Helpers/UsuarioExtensions.cs`). Todos los controladores ya tienen `[Authorize]`; las acciones POST de Carreras piden rol Corredor. Para mostrar fechas y km usen `Helpers/Formatos.cs` (`FechaCorta`, `MesAnio`, `FechaRelativa`, `Km`, `DistanciaCorta`). Harold: para el id del corredor logueado usa `User.ObtenerId()`. |
-| 3 | Harold | ⏳ Pendiente | | | |
+| 3 | Harold | ✅ Terminado | 2026-10-26 | Conecta carreras, equipos, organizaciones y perfil/vínculos de la organización | Carreras (catálogo, detalle, inscripción 11.1, ranking), Home con 3 abiertas, Equipos (crear/unirse/salir), Organizaciones y Org Perfil/Vínculos. Helper `Presentacion` para montos/fechas de tarjeta. Mauricio: Panel/Carrera/Formulario/Terminar/Reportes siguen con TODO y DATOS DE EJEMPLO. |
 | 4 | Mauricio | ⏳ Pendiente | | | |
 
 **Usuarios de prueba del seed** (creados por Victor; el login real se implementa en el turno de Nico):
