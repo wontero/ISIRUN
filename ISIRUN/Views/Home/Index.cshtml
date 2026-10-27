@@ -1,14 +1,7 @@
-﻿@{
+﻿@model List<CarreraTarjetaViewModel>
+@{
     ViewData["Title"] = "Inicio";
     ViewData["Menu"] = "ninguno";
-
-    // DATOS DE EJEMPLO — reemplazar por @model con las 3 próximas carreras abiertas.
-    var proximas = new[]
-    {
-        new { Id = 1, Distancia = "42K", Fecha = "15 NOV", Nombre = "Maratón de la Ciudad", Organiza = "Club Atlético Norte", Precio = "$35" },
-        new { Id = 2, Distancia = "10K", Fecha = "22 NOV", Nombre = "10K Nocturna del Parque", Organiza = "Municipalidad", Precio = "$15" },
-        new { Id = 3, Distancia = "21K", Fecha = "06 DIC", Nombre = "Trail Cerro Alto", Organiza = "Andes Outdoor", Precio = "$25" },
-    };
 }
 
 <header class="landing-header">
@@ -37,8 +30,8 @@
                 </div>
                 <div class="bib-number">0427</div>
                 <div class="bib-foot">
-                    <span class="race-name">10K Nocturna del Parque</span>
-                    <span class="muted small">Categoría 18–29 · 22 nov 2026</span>
+                    <span class="race-name">@(Model.FirstOrDefault()?.Nombre ?? "Tu próxima carrera")</span>
+                    <span class="muted small">@(Model.FirstOrDefault() is { } p ? $"{p.Distancia} · {p.Fecha}" : "Inscríbete y corre")</span>
                 </div>
             </div>
         </div>
@@ -51,22 +44,29 @@
             <h2 id="proximas" class="page-title">Próximas carreras</h2>
             <a class="strong" asp-controller="Carreras" asp-action="Index">Ver todas</a>
         </div>
-        <div class="grid-cards">
-            @foreach (var c in proximas)
-            {
-                <a class="race-card" asp-controller="Carreras" asp-action="Detalle" asp-route-id="@c.Id">
-                    <div class="race-card-top">
-                        <span class="race-dist">@c.Distancia</span>
-                        <span class="race-date">@c.Fecha</span>
-                    </div>
-                    <div class="race-card-body">
-                        <span class="race-name">@c.Nombre</span>
-                        <span class="muted small">Organiza: @c.Organiza</span>
-                        <span class="race-price">@c.Precio</span>
-                    </div>
-                </a>
-            }
-        </div>
+        @if (Model.Count == 0)
+        {
+            <p class="empty">Todavía no hay carreras abiertas.</p>
+        }
+        else
+        {
+            <div class="grid-cards">
+                @foreach (var c in Model)
+                {
+                    <a class="race-card" asp-controller="Carreras" asp-action="Detalle" asp-route-id="@c.Id">
+                        <div class="race-card-top">
+                            <span class="race-dist">@c.Distancia</span>
+                            <span class="race-date">@c.Fecha</span>
+                        </div>
+                        <div class="race-card-body">
+                            <span class="race-name">@c.Nombre</span>
+                            <span class="muted small">Organiza: @c.Organiza</span>
+                            <span class="race-price">@c.Precio</span>
+                        </div>
+                    </a>
+                }
+            </div>
+        }
     </section>
 
     <section class="stack" aria-labelledby="como">
