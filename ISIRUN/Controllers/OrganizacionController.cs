@@ -2,6 +2,7 @@ using System.Globalization;
 using ISIRUN.Data;
 using ISIRUN.Helpers;
 using ISIRUN.Models;
+using ISIRUN.Services;
 using ISIRUN.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +12,7 @@ namespace ISIRUN.Controllers;
 
 // Panel de la ORGANIZACIÓN logueada: sus carreras, crear/editar/eliminar, terminar, vínculos y perfil.
 [Authorize(Roles = Roles.Organizacion)]
-public class OrganizacionController(IsirunContext db) : Controller
+public class OrganizacionController(IsirunContext db, SimulacionCarreraService simulacion) : Controller
 {
     private const string VistaFormulario = "FormularioCarrera";
 
@@ -284,18 +285,53 @@ public class OrganizacionController(IsirunContext db) : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult EliminarCarrera(int id)
+    public async Task<IActionResult> EliminarCarrera(int id)
     {
-        // TODO (Mauricio): solo si está Abierta y la organización es la creadora.
-        TempData["Exito"] = "Carrera eliminada.";
+        var carrera = await db.Carreras
+            .Include(c => c.Organizadoras)
+            .FirstOrDefaultAsync(c => c.IdCarrera == id);
+        if (carrera == null) return NotFound();
+
+        var error = ErrorSiNoPuedeModificar(carrera);
+        if (error != null)
+        {
+            TempData["Error"] = error;
+            return RedirectToAction(nameof(Carrera), new { id });
+        }
+
+        // La base borra en cascada categorías, inscripciones, co-organizadoras y sponsors.
+        db.Carreras.Remove(carrera);
+        await db.SaveChangesAsync();
+
+        TempData["Exito"] = $"Carrera «{carrera.Nombre}» eliminada.";
         return RedirectToAction(nameof(Panel));
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult TerminarCarrera(int id)
+    public async Task<IActionResult> TerminarCarrera(int id)
     {
-        // TODO (Mauricio): ver la sección "Terminar carrera" de collab.md.
+        var carrera = await db.Carreras
+            .Include(c => c.Organizadoras)
+            .Include(c => c.Resultados).ThenInclude(r => r.Corredor)
+            .FirstOrDefaultAsync(c => c.IdCarrera == id);
+        if (carrera == null) return NotFound();
+
+        var error = ErrorSiNoPuedeModificar(carrera);
+        if (error != null)
+        {
+            TempData["Error"] = error;
+            return RedirectToAction(nameof(Carrera), new { id });
+        }
+
+        // Simula los tiempos y arma el ranking de cada categoría (en memoria).
+        simulacion.Terminar(carrera);
+
+        // Cada inscrito corrió la carrera: se suman sus km.
+        foreach (var resultado in carrera.Resultados)
+            resultado.Corredor.KmsTotales += carrera.Distancia;
+
+        await db.SaveChangesAsync();
         TempData["Exito"] = "Carrera terminada. El ranking ya es visible para todos los corredores.";
         return RedirectToAction(nameof(Carrera), new { id });
     }
