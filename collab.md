@@ -755,20 +755,20 @@ Lee primero las secciones **7** y **11** completas.
 Lee primero las secciones **8**, **10** y **13**.
 
 **Cuentas**
-- [ ] Configurar la autenticación por cookies en `Program.cs`, con `UseAuthentication` antes de `UseAuthorization` (sección 8)
-- [ ] Crear la extensión `User.ObtenerId()` (sección 8) y usarla en todos lados
-- [ ] `LoginViewModel` + login real (busca en Corredores y luego en Organizaciones; el mismo mensaje de error para ambos casos)
-- [ ] `RegistroViewModel` + registro de los 2 tipos, con validaciones (13): email único en **ambas** tablas, contraseñas que coinciden, edad ≥ 5. Inicia sesión automáticamente y redirige según el tipo
-- [ ] `Salir` real (`SignOutAsync`)
-- [ ] Poner `[Authorize(Roles = ...)]` en **todos** los controladores, según la sección 8
-- [ ] `_Layout`: elegir la barra según el rol cuando la vista no define `Menu`. `_NavCorredor` y `_NavOrganizacion`: mostrar las iniciales reales. Login: el selector de equipos del registro sale de la base
+- [x] Configurar la autenticación por cookies en `Program.cs`, con `UseAuthentication` antes de `UseAuthorization` (sección 8)
+- [x] Crear la extensión `User.ObtenerId()` (sección 8) y usarla en todos lados
+- [x] `LoginViewModel` + login real (busca en Corredores y luego en Organizaciones; el mismo mensaje de error para ambos casos)
+- [x] `RegistroViewModel` + registro de los 2 tipos, con validaciones (13): email único en **ambas** tablas, contraseñas que coinciden, edad ≥ 5. Inicia sesión automáticamente y redirige según el tipo
+- [x] `Salir` real (`SignOutAsync`)
+- [x] Poner `[Authorize(Roles = ...)]` en **todos** los controladores, según la sección 8
+- [x] `_Layout`: elegir la barra según el rol cuando la vista no define `Menu`. `_NavCorredor` y `_NavOrganizacion`: mostrar las iniciales reales. Login: el selector de equipos del registro sale de la base
 
 **Corredor**
-- [ ] `Corredor/Perfil` con `PerfilViewModel` (stats, equipo, inscripciones pendientes, resultados y últimas actividades)
-- [ ] `Corredor/Ver/{id}`: el perfil público de otro corredor
-- [ ] Actividades: crear, editar y eliminar, con `ActividadViewModel`, sus validaciones y el ajuste de `KmsTotales` (11.4). Solo el dueño puede editar o eliminar
-- [ ] `Feed` + like/unlike (11.5)
-- [ ] `Amigos`: búsqueda, agregar y quitar (no a uno mismo ni duplicado)
+- [x] `Corredor/Perfil` con `PerfilViewModel` (stats, equipo, inscripciones pendientes, resultados y últimas actividades)
+- [x] `Corredor/Ver/{id}`: el perfil público de otro corredor
+- [x] Actividades: crear, editar y eliminar, con `ActividadViewModel`, sus validaciones y el ajuste de `KmsTotales` (11.4). Solo el dueño puede editar o eliminar
+- [x] `Feed` + like/unlike (11.5)
+- [x] `Amigos`: búsqueda, agregar y quitar (no a uno mismo ni duplicado)
 
 **Definición de terminado:**
 - Puedes registrar un corredor nuevo y una organización nueva, cerrar sesión y volver a entrar con los dos.
@@ -839,7 +839,7 @@ Cada uno completa **su fila** al terminar su turno. Si algo quedó a medias, se 
 |---|---|---|---|---|---|
 | 0 | Mateo | ✅ Terminado | 2026-10-26 | Crea proyecto MVC con vistas, navegación y guía del equipo | Están listas todas las vistas, controladores con `TODO`, CSS, DER actualizado y esta guía. Victor: empieza por la sección 7. |
 | 1 | Victor | ✅ Implementación terminada; falta commit/push manual | 2026-10-26 | Pendiente: Victor hará los commits manualmente | Base, migración Inicial, helpers, simulación, seed y README listos y verificados. Tras recibir los cambios publicados por Victor, Nico ejecuta dotnet ef database update --project ISIRUN y dotnet run --project ISIRUN. Los helpers están en IsirunHelpers; Terminar no suma km ni guarda: lo hace el llamador (ver SeedData). Las vistas conservan ejemplos. |
-| 2 | Nico | ⏳ Pendiente | | | |
+| 2 | Nico | ✅ Terminado | 2026-10-26 | Implementa el feed de amigos con likes y la búsqueda, alta y baja de amigos | Login real con cookies y roles (`Helpers/Roles.cs` y `User.ObtenerId()` en `Helpers/UsuarioExtensions.cs`). Todos los controladores ya tienen `[Authorize]`; las acciones POST de Carreras piden rol Corredor. Para mostrar fechas y km usen `Helpers/Formatos.cs` (`FechaCorta`, `MesAnio`, `FechaRelativa`, `Km`, `DistanciaCorta`). Harold: para el id del corredor logueado usa `User.ObtenerId()`. |
 | 3 | Harold | ⏳ Pendiente | | | |
 | 4 | Mauricio | ⏳ Pendiente | | | |
 
@@ -848,7 +848,8 @@ Cada uno completa **su fila** al terminar su turno. Si algo quedó a medias, se 
 - Organización: `club.norte@isirun.test` / `Prueba123!`
 
 **Problemas conocidos / cosas a medias** (cualquiera agrega acá):
-- _(nada por ahora)_
+- Mi perfil y el perfil público ya no muestran "Categoría 18–29": la categoría depende de cada carrera, no del corredor (Nico).
+- Un visitante sin sesión en las páginas públicas ve la barra del corredor con "Entrar" en lugar de "Salir" (Nico).
 
 ---
 
