@@ -13,19 +13,137 @@ namespace ISIRUN.Controllers;
 [Authorize(Roles = Roles.Organizacion)]
 public class OrganizacionController(IsirunContext db) : Controller
 {
-    public IActionResult Panel()
+    public async Task<IActionResult> Panel()
     {
-        // TODO (Mauricio): carreras de la organización logueada (OrgCarrera), separadas en Abiertas y Terminadas,
-        // con cantidad de inscritos (count de Resultado).
-        return View();
+        var orgId = User.ObtenerId();
+        var org = await db.Organizaciones.AsNoTracking()
+            .FirstOrDefaultAsync(o => o.IdOrganizacion == orgId);
+        if (org == null) return NotFound();
+
+        // Todas las carreras donde participa (como creadora o como co-organizadora).
+        var carreras = await db.OrgCarreras
+            .AsNoTracking()
+            .Where(o => o.IdOrganizacion == orgId)
+            .Select(o => new
+            {
+                o.Carrera.IdCarrera,
+                o.Carrera.Nombre,
+                o.Carrera.Distancia,
+                o.Carrera.Fecha,
+                o.Carrera.Estado,
+                o.EsCreadora,
+                Creadora = o.Carrera.Organizadoras
+                    .Where(x => x.EsCreadora)
+                    .Select(x => x.Organizacion.Nombre)
+                    .FirstOrDefault(),
+                Inscritos = o.Carrera.Resultados.Count,
+                Ganador = o.Carrera.Resultados
+                    .Where(r => r.Tiempo != null)
+                    .OrderBy(r => r.Tiempo)
+                    .Select(r => new { r.Corredor.Nombre, r.Tiempo })
+                    .FirstOrDefault()
+            })
+            .ToListAsync();
+
+        var abiertas = carreras
+            .Where(c => c.Estado == EstadosCarrera.Abierta)
+            .OrderBy(c => c.Fecha)
+            .Select(c => new CarreraPanelAbiertaViewModel
+            {
+                Id = c.IdCarrera,
+                Distancia = Formatos.DistanciaCorta(c.Distancia),
+                Nombre = c.Nombre,
+                Fecha = Formatos.FechaCorta(c.Fecha),
+                Rol = c.EsCreadora ? "Organizadora" : $"Co-organizadora con {c.Creadora}",
+                Inscritos = c.Inscritos
+            }).ToList();
+
+        var terminadas = carreras
+            .Where(c => c.Estado == EstadosCarrera.Terminada)
+            .OrderByDescending(c => c.Fecha)
+            .Select(c => new CarreraPanelTerminadaViewModel
+            {
+                Id = c.IdCarrera,
+                Distancia = Formatos.DistanciaCorta(c.Distancia),
+                Nombre = c.Nombre,
+                Fecha = Formatos.FechaCorta(c.Fecha),
+                Ganador = c.Ganador == null
+                    ? "sin corredores"
+                    : $"{c.Ganador.Nombre} ({IsirunHelpers.FormatoTiempo(c.Ganador.Tiempo!.Value)})"
+            }).ToList();
+
+        return View(new PanelOrganizacionViewModel
+        {
+            Nombre = org.Nombre,
+            Actividad = org.Actividad,
+            InscritosEnAbiertas = abiertas.Sum(c => c.Inscritos),
+            Abiertas = abiertas,
+            Terminadas = terminadas
+        });
     }
 
     // Gestionar una carrera: inscritos por categoría, editar, vínculos, terminar y eliminar.
-    public IActionResult Carrera(int id, int? categoria = null)
+    // /Organizacion/Carrera/5?categoria=2
+    public async Task<IActionResult> Carrera(int id, int? categoria = null)
     {
-        // TODO (Mauricio): validar que la organización logueada esté en OrgCarrera de esa carrera.
-        // Si está Terminada, mostrar el ranking en vez de "Pendiente".
-        return View();
+        var carrera = await db.Carreras
+            .AsNoTracking()
+            .Include(c => c.Categorias)
+            .Include(c => c.Organizadoras)
+            .Include(c => c.Resultados).ThenInclude(r => r.Corredor).ThenInclude(c => c.Equipo)
+            .FirstOrDefaultAsync(c => c.IdCarrera == id);
+
+        if (carrera == null) return NotFound();
+
+        var orgId = User.ObtenerId();
+        var vinculo = carrera.Organizadoras.FirstOrDefault(o => o.IdOrganizacion == orgId);
+        if (vinculo == null)
+        {
+            TempData["Error"] = "No tienes acceso a esta carrera.";
+            return RedirectToAction(nameof(Panel));
+        }
+
+        var categorias = carrera.Categorias.OrderBy(c => c.EdadMinima).ToList();
+        var categoriaActual = categorias.Any(c => c.IdCategoria == categoria)
+            ? categoria
+            : categorias.FirstOrDefault()?.IdCategoria;
+
+        var terminada = carrera.Estado == EstadosCarrera.Terminada;
+        var inscritos = carrera.Resultados.Where(r => r.IdCategoria == categoriaActual);
+
+        // Abierta: por nombre y sin tiempos ("Pendiente"). Terminada: ordenados por ranking.
+        var filas = (terminada
+                ? inscritos.OrderBy(r => r.Ranking)
+                : inscritos.OrderBy(r => r.Corredor.Nombre))
+            .Select(r => new InscritoFilaViewModel
+            {
+                Ranking = r.Ranking,
+                Corredor = r.Corredor.Nombre,
+                Equipo = r.Corredor.Equipo?.Nombre ?? "Sin equipo",
+                Tiempo = r.Tiempo.HasValue ? IsirunHelpers.FormatoTiempo(r.Tiempo.Value) : null,
+                Ritmo = r.Tiempo.HasValue ? IsirunHelpers.FormatoRitmo(r.Tiempo.Value, carrera.Distancia) : null
+            }).ToList();
+
+        var vm = new GestionCarreraViewModel
+        {
+            Id = carrera.IdCarrera,
+            Nombre = carrera.Nombre,
+            Detalle = $"{Presentacion.FechaLarga(carrera.Fecha)} · {Formatos.Km(carrera.Distancia)} km"
+                + $" · {Presentacion.Monto(carrera.PrecioInscripcion)} · {carrera.Resultados.Count} inscritos",
+            Terminada = terminada,
+            EsCreadora = vinculo.EsCreadora,
+            TotalInscritos = carrera.Resultados.Count,
+            CategoriaActual = categoriaActual,
+            Categorias = categorias.Select(c => new CategoriaChipViewModel
+            {
+                Id = c.IdCategoria,
+                Rango = Presentacion.RangoEdad(c.EdadMinima, c.EdadMaxima),
+                Inscritos = carrera.Resultados.Count(r => r.IdCategoria == c.IdCategoria)
+            }).ToList(),
+            Filas = filas
+        };
+
+        return View(vm);
     }
 
     public IActionResult CrearCarrera()
