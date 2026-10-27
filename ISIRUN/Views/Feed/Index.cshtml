@@ -1,27 +1,21 @@
+@model IEnumerable<FeedItemViewModel>
 @{
     ViewData["Title"] = "Feed";
     ViewData["Nav"] = "feed";
-
-    // DATOS DE EJEMPLO — reemplazar por @model IEnumerable<FeedItemViewModel>
-    var posts = new[]
-    {
-        new { Id = 10, IdCorredor = 2, Iniciales = "DM", Corredor = "Diego Muñoz", Cuando = "Hace 2 h", Tipo = "Calle", Nombre = "Tempo por la costanera", Descripcion = "Buen ritmo los últimos 3 km.", Km = "10.0", Tiempo = "0:47:20", Ritmo = "4:44", Likes = 8, MeGusta = false },
-        new { Id = 11, IdCorredor = 3, Iniciales = "CV", Corredor = "Camila Vera", Cuando = "Ayer", Tipo = "Trail", Nombre = "Subida al cerro", Descripcion = "Mucho barro pero valió la pena la vista.", Km = "14.3", Tiempo = "1:52:05", Ritmo = "7:50", Likes = 15, MeGusta = true },
-    };
 }
 
 <main class="container">
     <div class="split">
         <div class="split-main stack">
             <h1 class="page-title">Feed</h1>
-            @foreach (var p in posts)
+            @foreach (var p in Model)
             {
                 <article class="card">
                     <header class="row center">
                         <a class="avatar dark" asp-controller="Corredor" asp-action="Ver" asp-route-id="@p.IdCorredor" aria-label="Ver perfil de @p.Corredor">@p.Iniciales</a>
                         <div class="stack tight grow">
                             <a class="strong" asp-controller="Corredor" asp-action="Ver" asp-route-id="@p.IdCorredor">@p.Corredor</a>
-                            <span class="muted xsmall">@p.Cuando · @p.Tipo</span>
+                            <span class="muted xsmall">@Formatos.FechaRelativa(p.Fecha) · @p.Tipo</span>
                         </div>
                     </header>
                     <div class="stack tight">
@@ -29,9 +23,9 @@
                         <p class="muted">@p.Descripcion</p>
                     </div>
                     <div class="metrics">
-                        <div><span class="label-upper">Distancia</span><span class="metric-value">@p.Km km</span></div>
-                        <div><span class="label-upper">Tiempo</span><span class="metric-value">@p.Tiempo</span></div>
-                        <div><span class="label-upper">Ritmo</span><span class="metric-value">@p.Ritmo /km</span></div>
+                        <div><span class="label-upper">Distancia</span><span class="metric-value">@Formatos.Km(p.Km) km</span></div>
+                        <div><span class="label-upper">Tiempo</span><span class="metric-value">@IsirunHelpers.FormatoTiempo(p.Tiempo)</span></div>
+                        <div><span class="label-upper">Ritmo</span><span class="metric-value">@IsirunHelpers.FormatoRitmo(p.Tiempo, p.Km) /km</span></div>
                     </div>
                     <form asp-action="Like" asp-route-id="@p.Id" method="post">
                         <button type="submit" class="btn @(p.MeGusta ? "btn-lime" : "btn-outline")" aria-pressed="@(p.MeGusta ? "true" : "false")">
@@ -40,7 +34,10 @@
                     </form>
                 </article>
             }
-            @* Si no hay posts: <p class="empty">Tus amigos todavía no registraron actividades.</p> *@
+            @if (!Model.Any())
+            {
+                <p class="empty">Tus amigos todavía no registraron actividades.</p>
+            }
         </div>
         <aside class="split-side stack">
             <section class="card dark">
