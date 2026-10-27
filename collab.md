@@ -806,21 +806,21 @@ Lee primero las secciones **9**, **10** y **11.1**.
 Lee primero las secciones **11.2**, **12**, **13** y **16**.
 
 **Gestión de carreras**
-- [ ] `Organizacion/Panel`: carreras propias abiertas y terminadas, con número de inscritos
-- [ ] `Organizacion/Carrera/{id}`: inscritos por categoría y, si está terminada, el ranking con tiempo y ritmo
-- [ ] Crear y editar carrera con `CarreraFormViewModel` + lista de categorías: agregar y quitar filas, y todas las validaciones de 13 (rangos sin superponerse, fecha futura, etc.). Al crear, se guarda `OrgCarrera` con `EsCreadora = true`
-- [ ] `EliminarCarrera`: solo la creadora y solo si está Abierta (cascada)
-- [ ] `TerminarCarrera`: usar `SimulacionCarreraService` (hecho por Victor), sumar los km a cada inscrito y mostrar el mensaje
+- [x] `Organizacion/Panel`: carreras propias abiertas y terminadas, con número de inscritos
+- [x] `Organizacion/Carrera/{id}`: inscritos por categoría y, si está terminada, el ranking con tiempo y ritmo
+- [x] Crear y editar carrera con `CarreraFormViewModel` + lista de categorías: agregar y quitar filas, y todas las validaciones de 13 (rangos sin superponerse, fecha futura, etc.). Al crear, se guarda `OrgCarrera` con `EsCreadora = true`
+- [x] `EliminarCarrera`: solo la creadora y solo si está Abierta (cascada)
+- [x] `TerminarCarrera`: usar `SimulacionCarreraService` (hecho por Victor), sumar los km a cada inscrito y mostrar el mensaje
 
 **Reportes (15 pts)**
-- [ ] Reporte 1, Inscripciones y recaudación, con consulta real, los 3 filtros y los totales **calculados en el controlador o ViewModel, no en la vista** (12)
-- [ ] Reporte 2, Rendimiento, con consulta real y los filtros por carrera terminada y agrupación (12)
+- [x] Reporte 1, Inscripciones y recaudación, con consulta real, los 3 filtros y los totales **calculados en el controlador o ViewModel, no en la vista** (12)
+- [x] Reporte 2, Rendimiento, con consulta real y los filtros por carrera terminada y agrupación (12)
 
 **Entrega final**
-- [ ] Probar el recorrido completo de la presentación (registro → inscripción → terminar carrera → ranking → reportes) con los datos del seed
-- [ ] Buscar en todo el proyecto `DATOS DE EJEMPLO` y `TODO`: **no debe quedar ninguno**. Si queda alguno de otro turno, avísale al dueño o resuélvelo
-- [ ] Borrar código sin uso y verificar que compile **sin warnings**
-- [ ] Completar el README: integrantes con su usuario de GitHub, descripción de los 2 reportes y usuarios de prueba
+- [x] Probar el recorrido completo de la presentación (registro → inscripción → terminar carrera → ranking → reportes) con los datos del seed
+- [x] Buscar en todo el proyecto `DATOS DE EJEMPLO` y `TODO`: **no debe quedar ninguno**. Si queda alguno de otro turno, avísale al dueño o resuélvelo
+- [x] Borrar código sin uso y verificar que compile **sin warnings**
+- [x] Completar el README: integrantes con su usuario de GitHub, descripción de los 2 reportes y usuarios de prueba
 - [ ] Exportar el DER actualizado a imagen (mermaid.live) y juntarlo con el DER original y la tabla de cambios
 - [ ] **Último commit: borrar `collab.md`** (ver el recuadro al final de este archivo)
 - [ ] Armar el ZIP **sin** `bin/`, `obj/`, `.vs/` ni `collab.md`, desde el último commit
@@ -838,7 +838,7 @@ Cada uno completa **su fila** al terminar su turno. Si algo quedó a medias, se 
 | 1 | Victor | ✅ Implementación terminada; falta commit/push manual | 2026-10-26 | Pendiente: Victor hará los commits manualmente | Base, migración Inicial, helpers, simulación, seed y README listos y verificados. Tras recibir los cambios publicados por Victor, Nico ejecuta dotnet ef database update --project ISIRUN y dotnet run --project ISIRUN. Los helpers están en IsirunHelpers; Terminar no suma km ni guarda: lo hace el llamador (ver SeedData). Las vistas conservan ejemplos. |
 | 2 | Nico | ✅ Terminado | 2026-10-26 | Implementa el feed de amigos con likes y la búsqueda, alta y baja de amigos | Login real con cookies y roles (`Helpers/Roles.cs` y `User.ObtenerId()` en `Helpers/UsuarioExtensions.cs`). Todos los controladores ya tienen `[Authorize]`; las acciones POST de Carreras piden rol Corredor. Para mostrar fechas y km usen `Helpers/Formatos.cs` (`FechaCorta`, `MesAnio`, `FechaRelativa`, `Km`, `DistanciaCorta`). Harold: para el id del corredor logueado usa `User.ObtenerId()`. |
 | 3 | Harold | ✅ Terminado | 2026-10-26 | Conecta carreras, equipos, organizaciones y perfil/vínculos de la organización | Carreras (catálogo, detalle, inscripción 11.1, ranking), Home con 3 abiertas, Equipos (crear/unirse/salir), Organizaciones y Org Perfil/Vínculos. Helper `Presentacion` para montos/fechas de tarjeta. Mauricio: Panel/Carrera/Formulario/Terminar/Reportes siguen con TODO y DATOS DE EJEMPLO. |
-| 4 | Mauricio | ⏳ Pendiente | | | |
+| 4 | Mauricio | ✅ Código terminado; falta la entrega final | 2026-10-26 | Completa el README para la entrega | Panel, gestionar carrera, crear/editar (categorías con Agregar/Quitar), eliminar, terminar (simulación + km) y los 2 reportes con totales en el controlador. Probado el recorrido completo con el seed. Corregido `[Range(typeof(decimal), ...)]` con `ParseLimitsInInvariantCulture` (en PCs con coma decimal el formulario de actividad daba error 500). No queda ningún `TODO` ni `DATOS DE EJEMPLO` y compila sin warnings. Falta: imagen del DER original y del actualizado, borrar este archivo y armar el ZIP. |
 
 **Usuarios de prueba del seed** (creados por Victor; el login real se implementa en el turno de Nico):
 - Corredor: `ana.rojas@isirun.test` / `Prueba123!`
@@ -853,25 +853,25 @@ Cada uno completa **su fila** al terminar su turno. Si algo quedó a medias, se 
 ## 16. Checklist de entrega
 
 **README.md** (en la raíz del repo, lo pide la rúbrica):
-- [ ] Nombre y descripción del proyecto
-- [ ] Integrantes y su usuario de GitHub
-- [ ] Requisitos (.NET 10 SDK, SQL Server LocalDB) y pasos para ejecutar
-- [ ] Cómo crear la base: `dotnet ef database update`
-- [ ] Descripción de los **2 reportes** y su utilidad (sección 12)
-- [ ] Un usuario corredor y uno de organización **de prueba** (del seed) para que el profe pueda entrar
+- [x] Nombre y descripción del proyecto
+- [x] Integrantes y su usuario de GitHub
+- [x] Requisitos (.NET 10 SDK, SQL Server LocalDB) y pasos para ejecutar
+- [x] Cómo crear la base: `dotnet ef database update`
+- [x] Descripción de los **2 reportes** y su utilidad (sección 12)
+- [x] Un usuario corredor y uno de organización **de prueba** (del seed) para que el profe pueda entrar
 
 **DER:**
 - [ ] DER original (la imagen del proyecto anterior)
 - [ ] DER actualizado: exportar el diagrama de `DER_actualizado.md` a imagen (pegarlo en https://mermaid.live → descargar PNG)
-- [ ] Explicación de los cambios: la tabla de `DER_actualizado.md`
-- [ ] **Revisar que el DER coincida con las entidades finales.** Si cambian algo del modelo, actualicen el DER.
+- [x] Explicación de los cambios: la tabla de `DER_actualizado.md`
+- [x] **Revisar que el DER coincida con las entidades finales.** Si cambian algo del modelo, actualicen el DER.
 
 **Código:**
-- [ ] Compila sin errores ni advertencias
-- [ ] No queda ningún `DATOS DE EJEMPLO` ni ningún `TODO` (búsquenlos)
-- [ ] No hay código comentado viejo ni archivos sin uso
-- [ ] No hay contraseñas, API keys ni cadenas de conexión con contraseña
-- [ ] La base arranca con datos del seed
+- [x] Compila sin errores ni advertencias
+- [x] No queda ningún `DATOS DE EJEMPLO` ni ningún `TODO` (búsquenlos)
+- [x] No hay código comentado viejo ni archivos sin uso
+- [x] No hay contraseñas, API keys ni cadenas de conexión con contraseña
+- [x] La base arranca con datos del seed
 
 **ZIP:**
 - [ ] Sin las carpetas `bin/`, `obj/` ni `.vs/` (en ningún proyecto)
