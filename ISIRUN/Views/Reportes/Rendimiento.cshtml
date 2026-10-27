@@ -1,29 +1,9 @@
+@model ReporteRendimientoViewModel
 @{
     ViewData["Title"] = "Reporte de rendimiento";
     ViewData["Menu"] = "org";
     ViewData["Nav"] = "reportes";
-    var agrupar = ViewData["Agrupar"] as string ?? "categoria";
-    var porEquipo = agrupar == "equipo";
-
-    // DATOS DE EJEMPLO — reemplazar por @model ReporteRendimientoViewModel (ver collab.md, "Reporte 2").
-    var carreras = new[] { new { Id = 4, Nombre = "10K Primavera" }, new { Id = 7, Nombre = "5K Invierno" } };
-    var filas = porEquipo
-        ? new[]
-        {
-            new { Grupo = "Runners del Norte", Finalistas = 3, Podios = 2, Mejor = "0:40:12", MejorNombre = "Diego Muñoz", Promedio = "0:51:57", Ritmo = "5:12" },
-            new { Grupo = "Corre Sur", Finalistas = 3, Podios = 3, Mejor = "0:41:30", MejorNombre = "Paula Fuentes", Promedio = "0:43:21", Ritmo = "4:20" },
-            new { Grupo = "Sin equipo", Finalistas = 5, Podios = 4, Mejor = "0:52:10", MejorNombre = "Marta Silva", Promedio = "1:05:03", Ritmo = "6:30" },
-            new { Grupo = "Los Madrugadores", Finalistas = 2, Podios = 2, Mejor = "0:42:45", MejorNombre = "Camila Vera", Promedio = "0:44:32", Ritmo = "4:27" },
-            new { Grupo = "Trail Cordillera", Finalistas = 1, Podios = 1, Mejor = "0:58:47", MejorNombre = "Claudia Mora", Promedio = "0:58:47", Ritmo = "5:52" },
-            new { Grupo = "Pista Libre", Finalistas = 1, Podios = 0, Mejor = "0:47:58", MejorNombre = "Valentina Díaz", Promedio = "0:47:58", Ritmo = "4:47" },
-        }
-        : new[]
-        {
-            new { Grupo = "18–29", Finalistas = 6, Podios = 3, Mejor = "0:40:12", MejorNombre = "Diego Muñoz", Promedio = "0:47:15", Ritmo = "4:43" },
-            new { Grupo = "30–39", Finalistas = 3, Podios = 3, Mejor = "0:41:30", MejorNombre = "Paula Fuentes", Promedio = "0:47:57", Ritmo = "4:48" },
-            new { Grupo = "40–49", Finalistas = 3, Podios = 3, Mejor = "0:44:05", MejorNombre = "Rodrigo Pérez", Promedio = "0:58:04", Ritmo = "5:48" },
-            new { Grupo = "50+", Finalistas = 3, Podios = 3, Mejor = "0:52:10", MejorNombre = "Marta Silva", Promedio = "1:05:16", Ritmo = "6:32" },
-        };
+    var porEquipo = Model.PorEquipo;
 }
 
 <main class="container">
@@ -41,9 +21,9 @@
         <div class="field wide">
             <label for="carrera">Carrera terminada</label>
             <select id="carrera" name="carrera" class="input sm">
-                @foreach (var c in carreras)
+                @foreach (var c in Model.Carreras)
                 {
-                    <option value="@c.Id" selected="@(Context.Request.Query["carrera"] == c.Id.ToString())">@c.Nombre</option>
+                    <option value="@c.Id" selected="@(c.Id == Model.CarreraSeleccionada)">@c.Nombre</option>
                 }
             </select>
         </div>
@@ -57,52 +37,63 @@
         <button type="submit" class="btn btn-dark">Ver reporte</button>
     </form>
 
-    <section class="stats" aria-label="Resumen">
-        <div class="stat"><span class="label-upper">Finalistas</span><span class="stat-value">15</span></div>
-        <div class="stat dark"><span class="label-upper">Mejor tiempo</span><span class="stat-value">0:40:12</span><span class="muted xsmall">Diego Muñoz</span></div>
-        <div class="stat"><span class="label-upper">Tiempo promedio</span><span class="stat-value">0:52:46</span></div>
-        <div class="stat"><span class="label-upper">Ritmo promedio</span><span class="stat-value">5:16 /km</span></div>
-    </section>
+    @if (Model.CarreraSeleccionada is null)
+    {
+        <p class="empty">Todavía no tienes carreras terminadas. El reporte aparece cuando terminas una carrera.</p>
+    }
+    else
+    {
+        <section class="stats" aria-label="Resumen">
+            <div class="stat"><span class="label-upper">Finalistas</span><span class="stat-value">@Model.TotalFinalistas</span></div>
+            <div class="stat dark"><span class="label-upper">Mejor tiempo</span><span class="stat-value">@Model.MejorTiempo</span><span class="muted xsmall">@Model.MejorNombre</span></div>
+            <div class="stat"><span class="label-upper">Tiempo promedio</span><span class="stat-value">@Model.TiempoPromedio</span></div>
+            <div class="stat"><span class="label-upper">Ritmo promedio</span><span class="stat-value">@Model.RitmoPromedio /km</span></div>
+        </section>
 
-    <section class="card" aria-labelledby="tabla-t">
-        <h2 id="tabla-t" class="section-title">@(porEquipo ? "Por equipo" : "Por categoría") · 10K Primavera</h2>
-        <div class="table-wrap">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th scope="col">@(porEquipo ? "Equipo" : "Categoría")</th>
-                        <th scope="col" class="num">Finalistas</th>
-                        <th scope="col" class="num">Podios</th>
-                        <th scope="col">Mejor tiempo</th>
-                        <th scope="col">Tiempo promedio</th>
-                        <th scope="col">Ritmo promedio</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var f in filas)
-                    {
+        <section class="card" aria-labelledby="tabla-t">
+            <h2 id="tabla-t" class="section-title">@(porEquipo ? "Por equipo" : "Por categoría") · @Model.NombreCarrera</h2>
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
                         <tr>
-                            <th scope="row">@f.Grupo</th>
-                            <td class="num">@f.Finalistas</td>
-                            <td class="num strong">@f.Podios</td>
-                            <td class="nums">@f.Mejor <span class="muted xsmall">@f.MejorNombre</span></td>
-                            <td class="nums">@f.Promedio</td>
-                            <td class="nums muted">@f.Ritmo /km</td>
+                            <th scope="col">@(porEquipo ? "Equipo" : "Categoría")</th>
+                            <th scope="col" class="num">Finalistas</th>
+                            <th scope="col" class="num">Podios</th>
+                            <th scope="col">Mejor tiempo</th>
+                            <th scope="col">Tiempo promedio</th>
+                            <th scope="col">Ritmo promedio</th>
                         </tr>
-                    }
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <th scope="row">Total</th>
-                        <td class="num">@filas.Sum(f => f.Finalistas)</td>
-                        <td class="num">@filas.Sum(f => f.Podios)</td>
-                        <td class="nums">0:40:12</td>
-                        <td class="nums">0:52:46</td>
-                        <td class="nums">5:16 /km</td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-        <p class="muted xsmall">Podios: corredores en los 3 primeros puestos de su categoría. Solo incluye carreras terminadas.</p>
-    </section>
+                    </thead>
+                    <tbody>
+                        @foreach (var f in Model.Filas)
+                        {
+                            <tr>
+                                <th scope="row">@f.Grupo</th>
+                                <td class="num">@f.Finalistas</td>
+                                <td class="num strong">@f.Podios</td>
+                                <td class="nums">@f.MejorTiempo <span class="muted xsmall">@f.MejorNombre</span></td>
+                                <td class="nums">@f.TiempoPromedio</td>
+                                <td class="nums muted">@f.Ritmo /km</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th scope="row">Total</th>
+                            <td class="num">@Model.TotalFinalistas</td>
+                            <td class="num">@Model.TotalPodios</td>
+                            <td class="nums">@Model.MejorTiempo</td>
+                            <td class="nums">@Model.TiempoPromedio</td>
+                            <td class="nums">@Model.RitmoPromedio /km</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            @if (Model.Filas.Count == 0)
+            {
+                <p class="empty">Esta carrera terminó sin corredores inscritos.</p>
+            }
+            <p class="muted xsmall">Podios: corredores en los 3 primeros puestos de su categoría. Solo incluye carreras terminadas.</p>
+        </section>
+    }
 </main>
