@@ -1,11 +1,7 @@
+@model RegistroViewModel
 @{
     ViewData["Title"] = "Crear cuenta";
     ViewData["Menu"] = "ninguno";
-    // /Cuenta/Registro?tipo=Organizacion abre con "Organización" marcado (link del Inicio).
-    var esOrg = Context.Request.Query["tipo"] == "Organizacion";
-
-    // DATOS DE EJEMPLO — reemplazar por la lista de equipos de la base (SelectList).
-    var equipos = new[] { "Runners del Norte", "Los Madrugadores", "Corre Sur" };
 }
 
 <div class="auth">
@@ -19,7 +15,6 @@
         </ul>
     </aside>
     <main class="auth-main">
-        @* TODO: cambiar por un RegistroViewModel y usar asp-for en cada input para la validación. *@
         <form class="form auth-form" asp-controller="Cuenta" asp-action="Registro" method="post">
             <h2 class="page-title">Crear cuenta</h2>
             <div asp-validation-summary="ModelOnly"></div>
@@ -28,65 +23,69 @@
                 <legend>Tipo de cuenta</legend>
                 <div class="grid-2">
                     <label>
-                        <input class="chip-input" type="radio" name="Tipo" value="Corredor" checked="@(!esOrg)" />
+                        <input class="chip-input" type="radio" name="Tipo" value="@Roles.Corredor" checked="@(Model.Tipo == Roles.Corredor)" />
                         <span class="option-card"><span class="strong">Corredor</span><span class="muted">Corro y me inscribo</span></span>
                     </label>
                     <label>
-                        <input class="chip-input" type="radio" name="Tipo" value="Organizacion" checked="@esOrg" />
+                        <input class="chip-input" type="radio" name="Tipo" value="@Roles.Organizacion" checked="@(Model.Tipo == Roles.Organizacion)" />
                         <span class="option-card"><span class="strong">Organización</span><span class="muted">Organizo carreras</span></span>
                     </label>
                 </div>
             </fieldset>
 
             @* Campos solo de corredor (site.js oculta/deshabilita según el tipo elegido) *@
-            <div class="form" data-tipo="Corredor">
+            <div class="form" data-tipo="@Roles.Corredor">
                 <div class="field">
-                    <label for="Nombre">Nombre completo</label>
-                    <input id="Nombre" name="Nombre" class="input" autocomplete="name" placeholder="Ana Rojas" required />
+                    <label asp-for="Nombre">Nombre completo</label>
+                    <input asp-for="Nombre" class="input" autocomplete="name" placeholder="Ana Rojas" required />
+                    <span asp-validation-for="Nombre"></span>
                 </div>
                 <div class="row">
                     <div class="field">
-                        <label for="FechaNac">Fecha de nacimiento</label>
-                        <input id="FechaNac" name="FechaNac" type="date" class="input" required />
+                        <label asp-for="FechaNac">Fecha de nacimiento</label>
+                        <input asp-for="FechaNac" type="date" class="input" required />
+                        <span asp-validation-for="FechaNac"></span>
                     </div>
                     <div class="field">
-                        <label for="IdEquipo">Equipo <span class="muted">(opcional)</span></label>
-                        <select id="IdEquipo" name="IdEquipo" class="input">
+                        <label asp-for="IdEquipo">Equipo <span class="muted">(opcional)</span></label>
+                        <select asp-for="IdEquipo" asp-items="Model.Equipos" class="input">
                             <option value="">Sin equipo por ahora</option>
-                            @foreach (var e in equipos)
-                            {
-                                <option>@e</option>
-                            }
                         </select>
+                        <span asp-validation-for="IdEquipo"></span>
                     </div>
                 </div>
             </div>
 
             @* Campos solo de organización *@
-            <div class="form" data-tipo="Organizacion">
+            <div class="form" data-tipo="@Roles.Organizacion">
                 <div class="field">
-                    <label for="NombreOrganizacion">Nombre de la organización</label>
-                    <input id="NombreOrganizacion" name="NombreOrganizacion" class="input" autocomplete="organization" placeholder="Club Atlético Norte" required />
+                    <label asp-for="NombreOrganizacion">Nombre de la organización</label>
+                    <input asp-for="NombreOrganizacion" class="input" autocomplete="organization" placeholder="Club Atlético Norte" required />
+                    <span asp-validation-for="NombreOrganizacion"></span>
                 </div>
                 <div class="field">
-                    <label for="Actividad">Actividad</label>
-                    <input id="Actividad" name="Actividad" class="input" placeholder="Club deportivo, municipalidad, tienda…" required />
+                    <label asp-for="Actividad">Actividad</label>
+                    <input asp-for="Actividad" class="input" placeholder="Club deportivo, municipalidad, tienda…" required />
+                    <span asp-validation-for="Actividad"></span>
                 </div>
             </div>
 
             <div class="field">
-                <label for="Email">Correo</label>
-                <input id="Email" name="Email" type="email" class="input" autocomplete="email" required />
+                <label asp-for="Email">Correo</label>
+                <input asp-for="Email" type="email" class="input" autocomplete="email" required />
+                <span asp-validation-for="Email"></span>
             </div>
             <div class="row">
                 <div class="field">
-                    <label for="Contrasena">Contraseña</label>
-                    <input id="Contrasena" name="Contrasena" type="password" class="input" autocomplete="new-password" minlength="8" required />
+                    <label asp-for="Contrasena">Contraseña</label>
+                    <input asp-for="Contrasena" type="password" class="input" autocomplete="new-password" minlength="8" required />
                     <span class="hint">Mínimo 8 caracteres.</span>
+                    <span asp-validation-for="Contrasena"></span>
                 </div>
                 <div class="field">
-                    <label for="ConfirmarContrasena">Confirmar contraseña</label>
-                    <input id="ConfirmarContrasena" name="ConfirmarContrasena" type="password" class="input" autocomplete="new-password" required />
+                    <label asp-for="ConfirmarContrasena">Confirmar contraseña</label>
+                    <input asp-for="ConfirmarContrasena" type="password" class="input" autocomplete="new-password" required />
+                    <span asp-validation-for="ConfirmarContrasena"></span>
                 </div>
             </div>
 
