@@ -1,37 +1,41 @@
+@model PerfilPublicoViewModel
 @{
     ViewData["Title"] = "Perfil de corredor";
     ViewData["Nav"] = "amigos";
-
-    // DATOS DE EJEMPLO — reemplazar por @model PerfilPublicoViewModel
-    var resultados = new[]
-    {
-        new { IdCarrera = 4, Carrera = "10K Primavera", Tiempo = "0:38:40", Ranking = 1 },
-        new { IdCarrera = 5, Carrera = "Media Maratón Costanera", Tiempo = "1:29:55", Ranking = 2 },
-    };
-    var actividades = new[]
-    {
-        new { Nombre = "Tempo por la costanera", Fecha = "Hoy", Km = "10.0", Tiempo = "0:47:20", Tipo = "Calle" },
-        new { Nombre = "Cuestas", Fecha = "22 oct", Km = "9.4", Tiempo = "0:55:00", Tipo = "Trail" },
-    };
 }
 
 <main class="container">
     <a class="back-link" asp-controller="Amigos" asp-action="Index">← Volver a amigos</a>
     <section class="card lg">
         <div class="row center">
-            <span class="avatar xl dark">DM</span>
+            <span class="avatar xl dark">@Model.Iniciales</span>
             <div class="grow stack tight">
-                <h1 class="page-title">Diego Muñoz</h1>
-                <p class="muted">Corredor desde ene 2024 · 25 años · Categoría 18–29 · <a class="strong" asp-controller="Equipos" asp-action="Detalle" asp-route-id="1">Runners del Norte</a></p>
+                <h1 class="page-title">@Model.Nombre</h1>
+                <p class="muted">
+                    Corredor desde @Formatos.MesAnio(Model.FechaRegistro) · @Model.Edad años
+                    @if (Model.IdEquipo != null)
+                    {
+                        <text> · </text><a class="strong" asp-controller="Equipos" asp-action="Detalle" asp-route-id="@Model.IdEquipo">@Model.Equipo</a>
+                    }
+                </p>
             </div>
-            <span class="badge badge-lime">✓ Amigos</span>
+            @if (Model.EsAmigo)
+            {
+                <span class="badge badge-lime">✓ Amigos</span>
+            }
+            else
+            {
+                <form asp-controller="Amigos" asp-action="Agregar" asp-route-id="@Model.IdCorredor" method="post">
+                    <button type="submit" class="btn btn-outline btn-sm">+ Agregar</button>
+                </form>
+            }
         </div>
     </section>
 
     <section class="stats" aria-label="Estadísticas">
-        <div class="stat dark"><span class="label-upper">Kms totales</span><span class="stat-value">712.4</span></div>
-        <div class="stat"><span class="label-upper">Carreras corridas</span><span class="stat-value">11</span></div>
-        <div class="stat"><span class="label-upper">Mejor ranking</span><span class="stat-value">#1</span></div>
+        <div class="stat dark"><span class="label-upper">Kms totales</span><span class="stat-value">@Formatos.Km(Model.KmsTotales)</span></div>
+        <div class="stat"><span class="label-upper">Carreras corridas</span><span class="stat-value">@Model.CarrerasCorridas</span></div>
+        <div class="stat"><span class="label-upper">Mejor ranking</span><span class="stat-value">@(Model.MejorRanking.HasValue ? $"#{Model.MejorRanking}" : "—")</span></div>
     </section>
 
     <div class="split">
@@ -41,27 +45,35 @@
                 <table class="table">
                     <thead><tr><th scope="col">Carrera</th><th scope="col">Tiempo</th><th scope="col">Ranking</th></tr></thead>
                     <tbody>
-                        @foreach (var r in resultados)
+                        @foreach (var r in Model.Resultados)
                         {
                             <tr>
                                 <td><a class="strong" asp-controller="Carreras" asp-action="Resultados" asp-route-id="@r.IdCarrera">@r.Carrera</a></td>
-                                <td class="nums">@r.Tiempo</td>
+                                <td class="nums">@IsirunHelpers.FormatoTiempo(r.Tiempo)</td>
                                 <td class="rank">#@r.Ranking</td>
                             </tr>
                         }
                     </tbody>
                 </table>
             </div>
+            @if (Model.Resultados.Count == 0)
+            {
+                <p class="empty">Todavía no corrió ninguna carrera terminada.</p>
+            }
         </section>
         <section class="card split-side">
             <h2 class="section-title">Actividades</h2>
             <div>
-                @foreach (var a in actividades)
+                @foreach (var a in Model.Actividades)
                 {
                     <div class="activity">
-                        <div class="row center"><span class="strong grow">@a.Nombre</span><span class="muted xsmall">@a.Fecha</span></div>
-                        <div class="activity-meta"><span><strong>@a.Km</strong> km</span><span><strong>@a.Tiempo</strong></span><span>@a.Tipo</span></div>
+                        <div class="row center"><span class="strong grow">@a.Nombre</span><span class="muted xsmall">@Formatos.FechaRelativa(a.Fecha)</span></div>
+                        <div class="activity-meta"><span><strong>@Formatos.Km(a.Km)</strong> km</span><span><strong>@IsirunHelpers.FormatoTiempo(a.Tiempo)</strong></span><span>@a.Tipo</span></div>
                     </div>
+                }
+                @if (Model.Actividades.Count == 0)
+                {
+                    <p class="empty">Aún no registró actividades.</p>
                 }
             </div>
         </section>

@@ -1,43 +1,32 @@
+@model PerfilViewModel
 @{
     ViewData["Title"] = "Mi perfil";
     ViewData["Nav"] = "perfil";
-
-    // DATOS DE EJEMPLO — reemplazar por @model PerfilViewModel
-    var inscripciones = new[]
-    {
-        new { IdCarrera = 2, Distancia = "10K", Nombre = "10K Nocturna del Parque", Fecha = "22 nov 2026", Categoria = "18–29" },
-        new { IdCarrera = 3, Distancia = "21K", Nombre = "Trail Cerro Alto", Fecha = "06 dic 2026", Categoria = "18–29" },
-    };
-    var resultados = new[]
-    {
-        new { IdCarrera = 5, Carrera = "Media Maratón Costanera", Categoria = "18–29", Tiempo = "1:48:12", Ranking = 3 },
-        new { IdCarrera = 6, Carrera = "5K Solidaria", Categoria = "18–29", Tiempo = "0:23:40", Ranking = 5 },
-        new { IdCarrera = 4, Carrera = "10K Primavera", Categoria = "18–29", Tiempo = "0:51:05", Ranking = 12 },
-    };
-    var actividades = new[]
-    {
-        new { Id = 1, Nombre = "Rodaje suave", Fecha = "Hoy", Km = "8.0", Tiempo = "0:46:30", Tipo = "Calle", Likes = 6 },
-        new { Id = 2, Nombre = "Series 6×800", Fecha = "Ayer", Km = "7.2", Tiempo = "0:38:10", Tipo = "Pista", Likes = 11 },
-        new { Id = 3, Nombre = "Fondo largo", Fecha = "23 oct", Km = "18.5", Tiempo = "1:49:00", Tipo = "Calle", Likes = 9 },
-    };
 }
 
 <main class="container">
     <section class="hero-card">
-        <span class="avatar xl">AR</span>
+        <span class="avatar xl">@Model.Iniciales</span>
         <div class="grow stack tight">
-            <h1 class="page-title">Ana Rojas</h1>
-            <p class="sub">Corredora desde mar 2025 · 27 años · Categoría 18–29</p>
-            <a class="btn btn-on-dark btn-sm" asp-controller="Equipos" asp-action="Detalle" asp-route-id="1">Runners del Norte</a>
+            <h1 class="page-title">@Model.Nombre</h1>
+            <p class="sub">Corredor desde @Formatos.MesAnio(Model.FechaRegistro) · @Model.Edad años</p>
+            @if (Model.IdEquipo != null)
+            {
+                <a class="btn btn-on-dark btn-sm" asp-controller="Equipos" asp-action="Detalle" asp-route-id="@Model.IdEquipo">@Model.Equipo</a>
+            }
+            else
+            {
+                <a class="btn btn-on-dark btn-sm" asp-controller="Equipos" asp-action="Index">Sin equipo · buscar uno</a>
+            }
         </div>
         <a class="btn btn-lime btn-lg" asp-controller="Actividades" asp-action="Crear">+ Registrar actividad</a>
     </section>
 
     <section class="stats" aria-label="Estadísticas">
-        <div class="stat"><span class="label-upper">Kms totales</span><span class="stat-value">486.2<small>km</small></span></div>
-        <div class="stat"><span class="label-upper">Carreras corridas</span><span class="stat-value">7</span></div>
-        <div class="stat"><span class="label-upper">Mejor ranking</span><span class="stat-value">#3</span></div>
-        <div class="stat"><span class="label-upper">Actividades</span><span class="stat-value">52</span></div>
+        <div class="stat"><span class="label-upper">Kms totales</span><span class="stat-value">@Formatos.Km(Model.KmsTotales)<small>km</small></span></div>
+        <div class="stat"><span class="label-upper">Carreras corridas</span><span class="stat-value">@Model.CarrerasCorridas</span></div>
+        <div class="stat"><span class="label-upper">Mejor ranking</span><span class="stat-value">@(Model.MejorRanking.HasValue ? $"#{Model.MejorRanking}" : "—")</span></div>
+        <div class="stat"><span class="label-upper">Actividades</span><span class="stat-value">@Model.TotalActividades</span></div>
     </section>
 
     <div class="split">
@@ -47,13 +36,17 @@
                     <h2 class="section-title">Mis inscripciones</h2>
                     <a class="small strong" asp-controller="Carreras" asp-action="Index">Buscar carreras</a>
                 </div>
-                @foreach (var i in inscripciones)
+                @foreach (var i in Model.Inscripciones)
                 {
                     <a class="list-item" asp-controller="Carreras" asp-action="Detalle" asp-route-id="@i.IdCarrera">
-                        <span class="tile dark lg">@i.Distancia</span>
-                        <span class="info"><span class="strong">@i.Nombre</span><span class="muted small">@i.Fecha · Cat. @i.Categoria</span></span>
+                        <span class="tile dark lg">@Formatos.DistanciaCorta(i.Distancia)</span>
+                        <span class="info"><span class="strong">@i.Nombre</span><span class="muted small">@Formatos.FechaCorta(i.Fecha) · Cat. @i.Categoria</span></span>
                         <span class="badge badge-pending">Inscrito · pendiente</span>
                     </a>
+                }
+                @if (Model.Inscripciones.Count == 0)
+                {
+                    <p class="empty">No tienes inscripciones pendientes.</p>
                 }
             </section>
 
@@ -63,30 +56,34 @@
                     <table class="table">
                         <thead><tr><th scope="col">Carrera</th><th scope="col">Categoría</th><th scope="col">Tiempo</th><th scope="col">Ranking</th></tr></thead>
                         <tbody>
-                            @foreach (var r in resultados)
+                            @foreach (var r in Model.Resultados)
                             {
                                 <tr>
                                     <td><a class="strong" asp-controller="Carreras" asp-action="Resultados" asp-route-id="@r.IdCarrera">@r.Carrera</a></td>
                                     <td class="muted">@r.Categoria</td>
-                                    <td class="nums">@r.Tiempo</td>
+                                    <td class="nums">@IsirunHelpers.FormatoTiempo(r.Tiempo)</td>
                                     <td class="rank">#@r.Ranking</td>
                                 </tr>
                             }
                         </tbody>
                     </table>
                 </div>
+                @if (Model.Resultados.Count == 0)
+                {
+                    <p class="empty">Todavía no corriste ninguna carrera terminada.</p>
+                }
             </section>
         </div>
 
         <section class="card split-side">
             <h2 class="section-title">Últimas actividades</h2>
             <div>
-                @foreach (var a in actividades)
+                @foreach (var a in Model.Actividades)
                 {
                     <div class="activity">
-                        <div class="row center"><span class="strong grow">@a.Nombre</span><span class="muted xsmall">@a.Fecha</span></div>
+                        <div class="row center"><span class="strong grow">@a.Nombre</span><span class="muted xsmall">@Formatos.FechaRelativa(a.Fecha)</span></div>
                         <div class="activity-meta">
-                            <span><strong>@a.Km</strong> km</span><span><strong>@a.Tiempo</strong></span><span>@a.Tipo</span><span>♥ @a.Likes</span>
+                            <span><strong>@Formatos.Km(a.Km)</strong> km</span><span><strong>@IsirunHelpers.FormatoTiempo(a.Tiempo)</strong></span><span>@a.Tipo</span><span>♥ @a.Likes</span>
                         </div>
                         <div class="row tight xsmall">
                             <a class="strong" asp-controller="Actividades" asp-action="Editar" asp-route-id="@a.Id">Editar</a>
@@ -95,7 +92,7 @@
                         <dialog id="eliminar-actividad-@a.Id" class="confirm danger" aria-labelledby="eliminar-actividad-@a.Id-t">
                             <form class="stack" asp-controller="Actividades" asp-action="Eliminar" asp-route-id="@a.Id" method="post">
                                 <h2 id="eliminar-actividad-@a.Id-t" class="section-title">¿Eliminar actividad?</h2>
-                                <p>Se eliminará «@a.Nombre» y se restarán @a.Km km de tu total. No se puede deshacer.</p>
+                                <p>Se eliminará «@a.Nombre» y se restarán @Formatos.Km(a.Km) km de tu total. No se puede deshacer.</p>
                                 <div class="form-actions">
                                     <button type="button" class="btn btn-outline" data-dialog-close>Cancelar</button>
                                     <button type="submit" class="btn btn-danger">Sí, eliminar</button>
@@ -103,6 +100,10 @@
                             </form>
                         </dialog>
                     </div>
+                }
+                @if (Model.Actividades.Count == 0)
+                {
+                    <p class="empty">Aún no registraste actividades.</p>
                 }
             </div>
         </section>
