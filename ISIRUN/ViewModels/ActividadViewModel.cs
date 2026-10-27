@@ -17,7 +17,7 @@ public class ActividadViewModel
     public string Tipo { get; set; } = Tipos[0];
 
     [Required(ErrorMessage = "La distancia es obligatoria.")]
-    [Range(typeof(decimal), "0.01", "9999.99", ErrorMessage = "La distancia debe ser mayor que 0.")]
+    [Range(typeof(decimal), "0.01", "9999.99", ParseLimitsInInvariantCulture = true, ErrorMessage = "La distancia debe ser mayor que 0.")]
     public decimal? DistanciaKm { get; set; }
 
     // Se escribe como texto "h:mm:ss" y el controlador lo convierte a TimeSpan.
