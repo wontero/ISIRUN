@@ -13,6 +13,8 @@ namespace ISIRUN.Controllers;
 [Authorize(Roles = Roles.Organizacion)]
 public class OrganizacionController(IsirunContext db) : Controller
 {
+    private const string VistaFormulario = "FormularioCarrera";
+
     public async Task<IActionResult> Panel()
     {
         var orgId = User.ObtenerId();
@@ -148,30 +150,134 @@ public class OrganizacionController(IsirunContext db) : Controller
 
     public IActionResult CrearCarrera()
     {
-        return View("FormularioCarrera");
+        // Empieza con una fila de categoría vacía.
+        return View(VistaFormulario, new CarreraFormViewModel { Categorias = [new CategoriaFormViewModel()] });
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult CrearCarrera(IFormCollection form)
+    public async Task<IActionResult> CrearCarrera(CarreraFormViewModel vm, int? quitarCategoria, string? agregarCategoria)
     {
-        // TODO (Mauricio): CarreraFormViewModel con validaciones.
-        TempData["Exito"] = "Carrera creada.";
-        return RedirectToAction(nameof(Carrera), new { id = 1 });
+        if (CambiarFilasCategorias(vm, quitarCategoria, agregarCategoria))
+            return View(VistaFormulario, vm);
+
+        ValidarCarrera(vm);
+        if (!ModelState.IsValid)
+            return View(VistaFormulario, vm);
+
+        var carrera = new Carrera { Estado = EstadosCarrera.Abierta };
+        CopiarDatos(vm, carrera);
+
+        var categorias = vm.Categorias.Select(_ => new CategoriaEdad()).ToList();
+        CopiarCategorias(vm.Categorias, categorias);
+        carrera.Categorias = categorias;
+
+        // La organización que la crea queda vinculada como creadora.
+        carrera.Organizadoras.Add(new OrgCarrera
+        {
+            IdOrganizacion = User.ObtenerId(),
+            FechaInicio = DateTime.Today,
+            TamanoEquipo = vm.TamanoEquipo!.Value,
+            EsCreadora = true
+        });
+
+        db.Carreras.Add(carrera);
+        await db.SaveChangesAsync();
+
+        TempData["Exito"] = "Carrera creada. Ya aparece en el catálogo para que los corredores se inscriban.";
+        return RedirectToAction(nameof(Carrera), new { id = carrera.IdCarrera });
     }
 
-    public IActionResult EditarCarrera(int id)
+    public async Task<IActionResult> EditarCarrera(int id)
     {
-        // TODO (Mauricio): cargar carrera {id} con categorías. Solo la creadora y solo si está Abierta.
+        var carrera = await db.Carreras
+            .AsNoTracking()
+            .Include(c => c.Categorias)
+            .Include(c => c.Organizadoras)
+            .FirstOrDefaultAsync(c => c.IdCarrera == id);
+        if (carrera == null) return NotFound();
+
+        var error = ErrorSiNoPuedeModificar(carrera);
+        if (error != null)
+        {
+            TempData["Error"] = error;
+            return RedirectToAction(nameof(Carrera), new { id });
+        }
+
+        var vm = new CarreraFormViewModel
+        {
+            IdCarrera = carrera.IdCarrera,
+            Nombre = carrera.Nombre,
+            Distancia = carrera.Distancia,
+            PrecioInscripcion = carrera.PrecioInscripcion,
+            Fecha = carrera.Fecha,
+            TamanoEquipo = carrera.Organizadoras.First(o => o.EsCreadora).TamanoEquipo,
+            Categorias = carrera.Categorias
+                .OrderBy(c => c.EdadMinima)
+                .Select(c => new CategoriaFormViewModel
+                {
+                    IdCategoria = c.IdCategoria,
+                    EdadMinima = c.EdadMinima,
+                    EdadMaxima = c.EdadMaxima,
+                    Premios = c.Premios
+                }).ToList()
+        };
+
         ViewData["Editando"] = true;
-        return View("FormularioCarrera");
+        return View(VistaFormulario, vm);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult EditarCarrera(int id, IFormCollection form)
+    public async Task<IActionResult> EditarCarrera(int id, CarreraFormViewModel vm, int? quitarCategoria, string? agregarCategoria)
     {
-        // TODO (Mauricio): mismas validaciones que CrearCarrera.
+        var carrera = await db.Carreras
+            .Include(c => c.Categorias)
+            .Include(c => c.Organizadoras)
+            .Include(c => c.Resultados).ThenInclude(r => r.Corredor)
+            .FirstOrDefaultAsync(c => c.IdCarrera == id);
+        if (carrera == null) return NotFound();
+
+        var error = ErrorSiNoPuedeModificar(carrera);
+        if (error != null)
+        {
+            TempData["Error"] = error;
+            return RedirectToAction(nameof(Carrera), new { id });
+        }
+
+        vm.IdCarrera = id;
+        ViewData["Editando"] = true;
+        if (CambiarFilasCategorias(vm, quitarCategoria, agregarCategoria))
+            return View(VistaFormulario, vm);
+
+        ValidarCarrera(vm);
+        if (ModelState.IsValid)
+            ValidarInscritos(vm, carrera);
+        if (!ModelState.IsValid)
+            return View(VistaFormulario, vm);
+
+        CopiarDatos(vm, carrera);
+        carrera.Organizadoras.First(o => o.EsCreadora).TamanoEquipo = vm.TamanoEquipo!.Value;
+
+        // Categorías: se borran las que se quitaron (ValidarInscritos ya comprobó que no tienen inscritos),
+        // se actualizan las que siguen y se agregan las nuevas (IdCategoria = 0).
+        var quitadas = carrera.Categorias
+            .Where(c => vm.Categorias.All(v => v.IdCategoria != c.IdCategoria))
+            .ToList();
+        db.CategoriasEdad.RemoveRange(quitadas);
+
+        var destino = vm.Categorias.Select(v =>
+        {
+            var existente = carrera.Categorias.FirstOrDefault(c => v.IdCategoria != 0 && c.IdCategoria == v.IdCategoria);
+            if (existente != null) return existente;
+
+            var nueva = new CategoriaEdad();
+            carrera.Categorias.Add(nueva);
+            return nueva;
+        }).ToList();
+        CopiarCategorias(vm.Categorias, destino);
+
+        await db.SaveChangesAsync();
         TempData["Exito"] = "Cambios guardados.";
         return RedirectToAction(nameof(Carrera), new { id });
     }
@@ -192,6 +298,121 @@ public class OrganizacionController(IsirunContext db) : Controller
         // TODO (Mauricio): ver la sección "Terminar carrera" de collab.md.
         TempData["Exito"] = "Carrera terminada. El ranking ya es visible para todos los corredores.";
         return RedirectToAction(nameof(Carrera), new { id });
+    }
+
+    // Solo la organización creadora puede editar, eliminar o terminar, y solo mientras la carrera está Abierta.
+    // La carrera tiene que venir con Include(c => c.Organizadoras).
+    private string? ErrorSiNoPuedeModificar(Carrera carrera)
+    {
+        var orgId = User.ObtenerId();
+        if (!carrera.Organizadoras.Any(o => o.IdOrganizacion == orgId && o.EsCreadora))
+            return "Solo la organización creadora puede editar, terminar o eliminar esta carrera.";
+        if (carrera.Estado != EstadosCarrera.Abierta)
+            return "La carrera ya está terminada: no se puede modificar.";
+        return null;
+    }
+
+    // Botones "Quitar" y "+ Agregar categoría" del formulario: cambian las filas y vuelven a mostrar
+    // el formulario sin guardar. Devuelve false cuando se apretó el botón de guardar.
+    private bool CambiarFilasCategorias(CarreraFormViewModel vm, int? quitarCategoria, string? agregarCategoria)
+    {
+        if (quitarCategoria.HasValue)
+        {
+            if (quitarCategoria.Value >= 0 && quitarCategoria.Value < vm.Categorias.Count)
+                vm.Categorias.RemoveAt(quitarCategoria.Value);
+        }
+        else if (agregarCategoria != null)
+        {
+            vm.Categorias.Add(new CategoriaFormViewModel());
+        }
+        else
+        {
+            return false;
+        }
+
+        // Sin esto, cada input mostraría el valor que antes tenía esa misma posición.
+        ModelState.Clear();
+        return true;
+    }
+
+    // Reglas que no se pueden poner como atributo en el ViewModel.
+    private void ValidarCarrera(CarreraFormViewModel vm)
+    {
+        if (vm.Fecha.HasValue && vm.Fecha.Value <= DateTime.Now)
+            ModelState.AddModelError(nameof(vm.Fecha), "La fecha debe ser futura.");
+
+        if (vm.Categorias.Count == 0)
+        {
+            ModelState.AddModelError("", "La carrera necesita al menos una categoría.");
+            return;
+        }
+
+        for (var i = 0; i < vm.Categorias.Count; i++)
+        {
+            if (vm.Categorias[i].EdadMinima > vm.Categorias[i].EdadMaxima)
+                ModelState.AddModelError($"Categorias[{i}].EdadMaxima", "Debe ser mayor o igual que la mínima.");
+        }
+
+        // Ordenados por edad mínima, cada rango tiene que empezar después de que termina el anterior.
+        var rangos = vm.Categorias
+            .Where(c => c.EdadMinima.HasValue && c.EdadMaxima.HasValue && c.EdadMinima <= c.EdadMaxima)
+            .OrderBy(c => c.EdadMinima)
+            .ToList();
+        for (var i = 1; i < rangos.Count; i++)
+        {
+            if (rangos[i].EdadMinima <= rangos[i - 1].EdadMaxima)
+            {
+                ModelState.AddModelError("",
+                    $"Los rangos {rangos[i - 1].EdadMinima}–{rangos[i - 1].EdadMaxima} y "
+                    + $"{rangos[i].EdadMinima}–{rangos[i].EdadMaxima} se superponen.");
+            }
+        }
+    }
+
+    // Al editar una carrera con inscritos: no se puede quitar una categoría que tiene inscritos, y con
+    // la nueva fecha y los nuevos rangos cada inscrito tiene que seguir entrando en su categoría.
+    private void ValidarInscritos(CarreraFormViewModel vm, Carrera carrera)
+    {
+        foreach (var categoria in carrera.Categorias)
+        {
+            var fila = vm.Categorias.FirstOrDefault(v => v.IdCategoria == categoria.IdCategoria);
+            var inscritos = carrera.Resultados.Where(r => r.IdCategoria == categoria.IdCategoria).ToList();
+            var rango = Presentacion.RangoEdad(categoria.EdadMinima, categoria.EdadMaxima);
+
+            if (fila == null)
+            {
+                if (inscritos.Count > 0)
+                    ModelState.AddModelError("", $"No se puede quitar la categoría {rango}: tiene {inscritos.Count} inscritos.");
+                continue;
+            }
+
+            var quedanFuera = inscritos.Any(r =>
+            {
+                var edad = IsirunHelpers.Edad(r.Corredor.FechaNac, vm.Fecha!.Value);
+                return edad < fila.EdadMinima || edad > fila.EdadMaxima;
+            });
+            if (quedanFuera)
+                ModelState.AddModelError("", $"Con esos cambios, inscritos de la categoría {rango} quedarían fuera de su rango de edad.");
+        }
+    }
+
+    private static void CopiarDatos(CarreraFormViewModel vm, Carrera carrera)
+    {
+        carrera.Nombre = vm.Nombre.Trim();
+        carrera.Distancia = vm.Distancia!.Value;
+        carrera.PrecioInscripcion = vm.PrecioInscripcion!.Value;
+        carrera.Fecha = vm.Fecha!.Value;
+    }
+
+    // Copia cada fila del formulario a la categoría de la misma posición.
+    private static void CopiarCategorias(List<CategoriaFormViewModel> filas, List<CategoriaEdad> categorias)
+    {
+        for (var i = 0; i < filas.Count; i++)
+        {
+            categorias[i].EdadMinima = filas[i].EdadMinima!.Value;
+            categorias[i].EdadMaxima = filas[i].EdadMaxima!.Value;
+            categorias[i].Premios = filas[i].Premios?.Trim() ?? "";
+        }
     }
 
     public async Task<IActionResult> Vinculos(int id)

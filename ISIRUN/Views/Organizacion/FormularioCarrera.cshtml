@@ -1,45 +1,48 @@
+@model CarreraFormViewModel
 @{
+    // Misma vista para Crear y Editar (el controlador pone ViewData["Editando"] = true al editar).
     var editando = ViewData["Editando"] is true;
     ViewData["Title"] = editando ? "Editar carrera" : "Crear carrera";
     ViewData["Menu"] = "org";
     ViewData["Nav"] = editando ? "panel" : "crear";
-
-    // DATOS DE EJEMPLO — al editar, vienen de la base. Al crear, empieza con 1 fila vacía.
-    var categorias = new[] { new { Min = "18", Max = "29" }, new { Min = "30", Max = "39" }, new { Min = "40", Max = "49" } };
 }
 
 <main class="container narrow">
     <a class="back-link" asp-action="Panel">← Mis carreras</a>
     <h1 class="page-title">@ViewData["Title"]</h1>
 
-    @* TODO: @model CarreraFormViewModel con List<CategoriaFormViewModel> Categorias.
-       Los inputs de categorías se llaman Categorias[0].EdadMinima, Categorias[1].EdadMinima, ...
-       así el model binding de ASP.NET arma la lista sola. *@
-    <form class="form" asp-action="@(editando ? "EditarCarrera" : "CrearCarrera")" method="post">
+    @* Los inputs de categorías se llaman Categorias[0].EdadMinima, Categorias[1].EdadMinima, ...
+       así el model binding arma la lista sola. *@
+    <form class="form" asp-action="@(editando ? "EditarCarrera" : "CrearCarrera")" asp-route-id="@(editando ? Model.IdCarrera.ToString() : null)" method="post">
         <div asp-validation-summary="ModelOnly"></div>
 
         <fieldset class="card lg form">
             <legend class="section-title">Datos de la carrera</legend>
             <div class="field">
-                <label for="Nombre">Nombre</label>
-                <input id="Nombre" name="Nombre" class="input" placeholder="Ej. 10K Nocturna del Parque" maxlength="150" required />
+                <label asp-for="Nombre">Nombre</label>
+                <input asp-for="Nombre" class="input" placeholder="Ej. 10K Nocturna del Parque" maxlength="150" required />
+                <span asp-validation-for="Nombre"></span>
             </div>
             <div class="row">
                 <div class="field">
-                    <label for="Distancia">Distancia (km)</label>
-                    <input id="Distancia" name="Distancia" type="number" min="0.1" step="0.1" class="input" placeholder="10" required />
+                    <label asp-for="Distancia">Distancia (km)</label>
+                    <input asp-for="Distancia" type="number" min="0.1" step="0.1" class="input" placeholder="10" required />
+                    <span asp-validation-for="Distancia"></span>
                 </div>
                 <div class="field">
-                    <label for="PrecioInscripcion">Precio de inscripción</label>
-                    <input id="PrecioInscripcion" name="PrecioInscripcion" type="number" min="0" step="0.01" class="input" placeholder="15.00" required />
+                    <label asp-for="PrecioInscripcion">Precio de inscripción</label>
+                    <input asp-for="PrecioInscripcion" type="number" min="0" step="0.01" class="input" placeholder="15.00" required />
+                    <span asp-validation-for="PrecioInscripcion"></span>
                 </div>
                 <div class="field">
-                    <label for="Fecha">Fecha y hora</label>
-                    <input id="Fecha" name="Fecha" type="datetime-local" class="input" required />
+                    <label asp-for="Fecha">Fecha y hora</label>
+                    <input asp-for="Fecha" type="datetime-local" class="input" required />
+                    <span asp-validation-for="Fecha"></span>
                 </div>
                 <div class="field">
-                    <label for="TamanoEquipo">Personas en tu equipo organizador</label>
-                    <input id="TamanoEquipo" name="TamanoEquipo" type="number" min="1" class="input" placeholder="25" required />
+                    <label asp-for="TamanoEquipo">Personas en tu equipo organizador</label>
+                    <input asp-for="TamanoEquipo" type="number" min="1" class="input" placeholder="25" required />
+                    <span asp-validation-for="TamanoEquipo"></span>
                 </div>
             </div>
         </fieldset>
@@ -47,33 +50,35 @@
         <fieldset class="card lg form">
             <legend class="section-title">Categorías por edad</legend>
             <p class="muted small">Toda carrera necesita al menos una categoría y los rangos no pueden superponerse. Los corredores se ubican solos según su edad.</p>
-            @for (var i = 0; i < categorias.Length; i++)
+            @for (var i = 0; i < Model.Categorias.Count; i++)
             {
                 <div class="cat-row">
+                    <input type="hidden" asp-for="Categorias[i].IdCategoria" />
                     <span class="section-title muted">@(i + 1)</span>
                     <div class="field fixed">
-                        <label for="Categorias_@(i)__EdadMinima">Edad mínima</label>
-                        <input id="Categorias_@(i)__EdadMinima" name="Categorias[@i].EdadMinima" type="number" min="0" max="120" class="input sm" value="@categorias[i].Min" required />
+                        <label asp-for="Categorias[i].EdadMinima">Edad mínima</label>
+                        <input asp-for="Categorias[i].EdadMinima" type="number" min="0" max="150" class="input sm" required />
+                        <span asp-validation-for="Categorias[i].EdadMinima"></span>
                     </div>
                     <div class="field fixed">
-                        <label for="Categorias_@(i)__EdadMaxima">Edad máxima</label>
-                        <input id="Categorias_@(i)__EdadMaxima" name="Categorias[@i].EdadMaxima" type="number" min="0" max="120" class="input sm" value="@categorias[i].Max" required />
+                        <label asp-for="Categorias[i].EdadMaxima">Edad máxima</label>
+                        <input asp-for="Categorias[i].EdadMaxima" type="number" min="0" max="150" class="input sm" required />
+                        <span asp-validation-for="Categorias[i].EdadMaxima"></span>
                     </div>
                     <div class="field wide">
-                        <label for="Categorias_@(i)__Premios">Premios</label>
-                        <input id="Categorias_@(i)__Premios" name="Categorias[@i].Premios" class="input sm" placeholder="1° $100 · 2° $50 · 3° medalla" />
+                        <label asp-for="Categorias[i].Premios">Premios</label>
+                        <input asp-for="Categorias[i].Premios" class="input sm" placeholder="1.º: $100; 2.º: $50; 3.º: medalla" />
+                        <span asp-validation-for="Categorias[i].Premios"></span>
                     </div>
-                    @* TODO: quitar fila. Opción simple: un botón submit con name="QuitarCategoria" value="@i"
-                       que el controlador procesa y vuelve a mostrar el formulario. *@
+                    @* Quitar y Agregar mandan el formulario sin validar: el controlador cambia las filas y lo vuelve a mostrar. *@
                     <button type="submit" name="QuitarCategoria" value="@i" formnovalidate class="btn btn-danger-outline btn-sm" aria-label="Quitar categoría @(i + 1)">Quitar</button>
                 </div>
             }
-            @* TODO: agregar fila. Igual que quitar: el controlador agrega una categoría vacía y devuelve View(vm). *@
             <button type="submit" name="AgregarCategoria" value="1" formnovalidate class="btn btn-dashed">+ Agregar categoría</button>
         </fieldset>
 
         <div class="form-actions">
-            <a class="btn btn-outline btn-lg" asp-action="Panel">Cancelar</a>
+            <a class="btn btn-outline btn-lg" asp-action="@(editando ? "Carrera" : "Panel")" asp-route-id="@(editando ? Model.IdCarrera.ToString() : null)">Cancelar</a>
             <button type="submit" class="btn btn-dark btn-lg">@(editando ? "Guardar cambios" : "Crear carrera")</button>
         </div>
     </form>
