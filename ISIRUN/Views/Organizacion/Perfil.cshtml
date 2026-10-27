@@ -1,3 +1,4 @@
+@model PerfilOrganizacionViewModel
 @{
     ViewData["Title"] = "Perfil de la organización";
     ViewData["Menu"] = "org";
@@ -6,16 +7,17 @@
 
 <main class="container xs">
     <h1 class="page-title">Perfil de la organización</h1>
-    @* TODO: @model PerfilOrganizacionViewModel y asp-for en los inputs (vienen con los datos actuales). *@
     <form class="card lg form" asp-action="Perfil" method="post">
         <div asp-validation-summary="ModelOnly"></div>
         <div class="field">
-            <label for="Nombre">Nombre</label>
-            <input id="Nombre" name="Nombre" class="input" value="Club Atlético Norte" maxlength="150" required />
+            <label asp-for="Nombre"></label>
+            <input asp-for="Nombre" class="input" maxlength="150" />
+            <span asp-validation-for="Nombre"></span>
         </div>
         <div class="field">
-            <label for="Actividad">Actividad</label>
-            <input id="Actividad" name="Actividad" class="input" value="Club deportivo" maxlength="150" required />
+            <label asp-for="Actividad"></label>
+            <input asp-for="Actividad" class="input" maxlength="500" />
+            <span asp-validation-for="Actividad"></span>
             <span class="hint">A qué se dedica. Se muestra debajo del nombre.</span>
         </div>
         <p class="alert alert-info">El nombre y la actividad aparecen en el detalle de cada carrera que organizas o patrocinas.</p>

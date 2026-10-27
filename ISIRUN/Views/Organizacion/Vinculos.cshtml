@@ -1,27 +1,17 @@
+@model VinculosViewModel
 @{
     ViewData["Title"] = "Sponsors y co-organizadores";
     ViewData["Menu"] = "org";
     ViewData["Nav"] = "panel";
-
-    // DATOS DE EJEMPLO — reemplazar por @model VinculosViewModel
-    var id = 2;
-    var vinculadas = new[]
-    {
-        new { IdOrganizacion = 2, Nombre = "Club Atlético Norte", Rol = "Organizadora", Detalle = "Creadora · desde 15 sep 2026 · equipo de 10", EsCreadora = true },
-        new { IdOrganizacion = 1, Nombre = "Municipalidad", Rol = "Organizadora", Detalle = "Co-organizadora · desde 01 ago 2026 · equipo de 25", EsCreadora = false },
-        new { IdOrganizacion = 3, Nombre = "Deportes Andes", Rol = "Sponsor", Detalle = "Sponsor principal · $2.000", EsCreadora = false },
-    };
-    var organizaciones = new[] { "Deportes Andes", "Hidrata Bebidas", "Municipalidad" };
-    var tiposSponsor = new[] { "Sponsor principal", "Indumentaria", "Hidratación", "Apoyo médico", "Premios" };
 }
 
 <main class="container narrow">
-    <a class="back-link" asp-action="Carrera" asp-route-id="@id">← 10K Nocturna del Parque</a>
+    <a class="back-link" asp-action="Carrera" asp-route-id="@Model.IdCarrera">← @Model.NombreCarrera</a>
     <h1 class="page-title">Sponsors y co-organizadores</h1>
 
     <section class="card" aria-labelledby="vinc-t">
         <h2 id="vinc-t" class="section-title">Vinculadas a esta carrera</h2>
-        @foreach (var v in vinculadas)
+        @foreach (var v in Model.Vinculadas)
         {
             <div class="list-item">
                 <span class="info"><span class="strong">@v.Nombre</span><span class="muted xsmall">@v.Detalle</span></span>
@@ -34,7 +24,7 @@
                     var dialogId = $"quitar-{v.Rol}-{v.IdOrganizacion}";
                     <button type="button" class="btn btn-danger-outline btn-sm" data-dialog-open="@dialogId">Quitar</button>
                     <dialog id="@dialogId" class="confirm danger" aria-labelledby="@(dialogId)-t">
-                        <form class="stack" asp-action="QuitarVinculo" asp-route-id="@id" method="post">
+                        <form class="stack" asp-action="QuitarVinculo" asp-route-id="@Model.IdCarrera" method="post">
                             <input type="hidden" name="idOrganizacion" value="@v.IdOrganizacion" />
                             <input type="hidden" name="rol" value="@v.Rol" />
                             <h2 id="@(dialogId)-t" class="section-title">¿Quitar a @v.Nombre?</h2>
@@ -51,14 +41,14 @@
     </section>
 
     <h2 class="section-title">Agregar organización</h2>
-    <form class="card lg form" asp-action="AgregarVinculo" asp-route-id="@id" method="post">
+    <form class="card lg form" asp-action="AgregarVinculo" asp-route-id="@Model.IdCarrera" method="post">
         <div asp-validation-summary="ModelOnly"></div>
         <div class="field">
             <label for="IdOrganizacion">Organización</label>
             <select id="IdOrganizacion" name="IdOrganizacion" class="input" required>
-                @foreach (var o in organizaciones)
+                @foreach (var o in Model.OrganizacionesDisponibles)
                 {
-                    <option>@o</option>
+                    <option value="@o.Id">@o.Nombre</option>
                 }
             </select>
             <span class="hint">Solo aparecen organizaciones registradas en ISIRUN.</span>
@@ -78,7 +68,6 @@
             </div>
         </fieldset>
 
-        @* Completar solo los campos del rol elegido; el controlador valida según form["Rol"]. *@
         <div class="row">
             <div class="field">
                 <label for="FechaInicio">Fecha de inicio <span class="muted">(co-organizadora)</span></label>
@@ -97,7 +86,7 @@
             <div class="field">
                 <label for="TipoParticipacion">Tipo de participación <span class="muted">(sponsor)</span></label>
                 <select id="TipoParticipacion" name="TipoParticipacion" class="input">
-                    @foreach (var t in tiposSponsor)
+                    @foreach (var t in Model.TiposSponsor)
                     {
                         <option>@t</option>
                     }
@@ -106,7 +95,7 @@
         </div>
 
         <div class="form-actions">
-            <a class="btn btn-outline btn-lg" asp-action="Carrera" asp-route-id="@id">Volver</a>
+            <a class="btn btn-outline btn-lg" asp-action="Carrera" asp-route-id="@Model.IdCarrera">Volver</a>
             <button type="submit" class="btn btn-dark btn-lg">Vincular</button>
         </div>
     </form>
