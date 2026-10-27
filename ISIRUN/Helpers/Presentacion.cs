@@ -2,7 +2,7 @@ using System.Globalization;
 
 namespace ISIRUN.Helpers;
 
-// Textos listos para mostrar en las vistas de Harold (montos, rangos, fechas de tarjeta).
+// Textos listos para mostrar en las vistas (montos, rangos, fechas de tarjeta).
 public static class Presentacion
 {
     private static readonly CultureInfo EsCl = new("es-CL");

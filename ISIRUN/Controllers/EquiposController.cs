@@ -91,21 +91,15 @@ public class EquiposController(IsirunContext db) : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Crear(string nombre)
+    public async Task<IActionResult> Crear(CrearEquipoViewModel vm)
     {
-        nombre = (nombre ?? "").Trim();
-        if (string.IsNullOrWhiteSpace(nombre))
+        if (!ModelState.IsValid)
         {
-            TempData["Error"] = "El nombre es obligatorio.";
+            TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).First().ErrorMessage;
             return RedirectToAction(nameof(Index));
         }
 
-        if (nombre.Length > 150)
-        {
-            TempData["Error"] = "Máximo 150 caracteres.";
-            return RedirectToAction(nameof(Index));
-        }
-
+        var nombre = vm.Nombre.Trim();
         if (await db.Equipos.AnyAsync(e => e.Nombre == nombre))
         {
             TempData["Error"] = "Ya existe un equipo con ese nombre.";
