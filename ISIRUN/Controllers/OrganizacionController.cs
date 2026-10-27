@@ -1,9 +1,12 @@
+using ISIRUN.Helpers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ISIRUN.Controllers;
 
 // Panel de la ORGANIZACIÓN logueada: sus carreras, crear/editar/eliminar, terminar, vínculos y perfil.
 // TODO (auth): agregar [Authorize(Roles = "Organizacion")] a la clase cuando exista el login.
+[Authorize(Roles = Roles.Organizacion)]
 public class OrganizacionController : Controller
 {
     public IActionResult Panel()

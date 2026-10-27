@@ -14,8 +14,7 @@
             <a class="@Clase("reportes")" aria-current="@Actual("reportes")" asp-controller="Reportes" asp-action="Inscripciones">Reportes</a>
             <a class="@Clase("perfil")" aria-current="@Actual("perfil")" asp-controller="Organizacion" asp-action="Perfil">Perfil de la organización</a>
         </div>
-        @* TODO (auth): iniciales de la organización logueada *@
-        <a class="avatar square" asp-controller="Organizacion" asp-action="Perfil" aria-label="Perfil de la organización">CA</a>
+        <a class="avatar square" asp-controller="Organizacion" asp-action="Perfil" aria-label="Perfil de la organización">@IsirunHelpers.Iniciales(User.Identity?.Name)</a>
         <form asp-controller="Cuenta" asp-action="Salir" method="post">
             <button type="submit" class="nav-exit">Salir</button>
         </form>

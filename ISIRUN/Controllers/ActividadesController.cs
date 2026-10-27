@@ -1,8 +1,11 @@
+using ISIRUN.Helpers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ISIRUN.Controllers;
 
 // CRUD de actividades (entrenamientos) del corredor logueado.
+[Authorize(Roles = Roles.Corredor)]
 public class ActividadesController : Controller
 {
     public IActionResult Crear()

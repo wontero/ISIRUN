@@ -1,7 +1,10 @@
+using ISIRUN.Helpers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ISIRUN.Controllers;
 
+[Authorize(Roles = Roles.Corredor)]
 public class EquiposController : Controller
 {
     public IActionResult Index()

@@ -1,8 +1,11 @@
+using ISIRUN.Helpers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ISIRUN.Controllers;
 
 // Actividades de los amigos, con likes.
+[Authorize(Roles = Roles.Corredor)]
 public class FeedController : Controller
 {
     public IActionResult Index()

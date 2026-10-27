@@ -1,9 +1,12 @@
+using ISIRUN.Helpers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ISIRUN.Controllers;
 
 // Los 2 reportes que pide la rúbrica. Solo datos de las carreras de la organización logueada.
 // TODO (auth): [Authorize(Roles = "Organizacion")]
+[Authorize(Roles = Roles.Organizacion)]
 public class ReportesController : Controller
 {
     // /Reportes/Inscripciones?desde=2026-01-01&hasta=2026-12-31&estado=Abierta

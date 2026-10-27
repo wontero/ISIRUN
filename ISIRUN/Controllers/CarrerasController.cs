@@ -1,3 +1,5 @@
+using ISIRUN.Helpers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ISIRUN.Controllers;
@@ -31,6 +33,7 @@ public class CarrerasController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = Roles.Corredor)]
     public IActionResult Inscribirse(int id)
     {
         // TODO: validar que la carrera esté Abierta y que no esté ya inscrito.
@@ -43,6 +46,7 @@ public class CarrerasController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = Roles.Corredor)]
     public IActionResult CancelarInscripcion(int id)
     {
         // TODO: solo si la carrera está Abierta. Borrar el Resultado (corredor logueado, carrera {id}).

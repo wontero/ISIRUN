@@ -1,8 +1,11 @@
+using ISIRUN.Helpers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ISIRUN.Controllers;
 
 // Perfil del corredor logueado y perfil público de otro corredor.
+[Authorize(Roles = Roles.Corredor)]
 public class CorredorController : Controller
 {
     public IActionResult Perfil()

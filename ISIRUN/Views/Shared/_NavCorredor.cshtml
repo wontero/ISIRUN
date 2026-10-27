@@ -15,10 +15,17 @@
             <a class="@Clase("organizaciones")" aria-current="@Actual("organizaciones")" asp-controller="Organizaciones" asp-action="Index">Organizaciones</a>
             <a class="@Clase("amigos")" aria-current="@Actual("amigos")" asp-controller="Amigos" asp-action="Index">Amigos</a>
         </div>
-        @* TODO (auth): iniciales del corredor logueado *@
-        <a class="avatar" asp-controller="Corredor" asp-action="Perfil" aria-label="Mi perfil">AR</a>
-        <form asp-controller="Cuenta" asp-action="Salir" method="post">
-            <button type="submit" class="nav-exit">Salir</button>
-        </form>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <a class="avatar" asp-controller="Corredor" asp-action="Perfil" aria-label="Mi perfil">@IsirunHelpers.Iniciales(User.Identity.Name)</a>
+            <form asp-controller="Cuenta" asp-action="Salir" method="post">
+                <button type="submit" class="nav-exit">Salir</button>
+            </form>
+        }
+        else
+        {
+            @* Visitante sin sesión en una página pública (catálogo de carreras u organizaciones) *@
+            <a class="nav-exit" asp-controller="Cuenta" asp-action="Login">Entrar</a>
+        }
     </nav>
 </header>
