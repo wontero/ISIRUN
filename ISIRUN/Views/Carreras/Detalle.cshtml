@@ -1,27 +1,7 @@
+@model CarreraDetalleViewModel
 @{
-    ViewData["Title"] = "10K Nocturna del Parque";
+    ViewData["Title"] = Model.Nombre;
     ViewData["Nav"] = "carreras";
-
-    // DATOS DE EJEMPLO — reemplazar por @model CarreraDetalleViewModel
-    var id = 2;
-    var inscrito = false; // TODO: ¿el corredor logueado ya tiene un Resultado en esta carrera?
-    var categorias = new[]
-    {
-        new { Rango = "18–29", Premios = "1° $100 · 2° $50 · 3° medalla", Inscritos = 64 },
-        new { Rango = "30–39", Premios = "1° $100 · 2° $50 · 3° medalla", Inscritos = 81 },
-        new { Rango = "40–49", Premios = "1° $80 · 2° $40 · 3° medalla", Inscritos = 47 },
-        new { Rango = "50+", Premios = "1° $80 · 2° medalla · 3° medalla", Inscritos = 22 },
-    };
-    var organizadoras = new[]
-    {
-        new { Id = 1, Iniciales = "MU", Nombre = "Municipalidad", Desde = "01 ago 2026", Equipo = 25 },
-        new { Id = 2, Iniciales = "CA", Nombre = "Club Atlético Norte", Desde = "15 sep 2026", Equipo = 10 },
-    };
-    var sponsors = new[]
-    {
-        new { Id = 3, Iniciales = "DA", Nombre = "Deportes Andes", Tipo = "Sponsor principal", Monto = "$2.000" },
-        new { Id = 4, Iniciales = "HB", Nombre = "Hidrata Bebidas", Tipo = "Hidratación", Monto = "$800" },
-    };
 }
 
 <section class="race-hero">
@@ -29,22 +9,26 @@
         <a class="back-link" asp-action="Index">← Todas las carreras</a>
         <div class="row center">
             <div class="grow stack">
-                <span class="race-dist">10K</span>
-                <h1 class="page-title">10K Nocturna del Parque</h1>
-                <div class="meta"><span>Sáb 22 nov 2026 · 20:00</span><span>Distancia: 10 km</span><span>Inscripción: <strong>$15</strong></span></div>
+                <span class="race-dist">@Model.DistanciaCorta</span>
+                <h1 class="page-title">@Model.Nombre</h1>
+                <div class="meta"><span>@Model.FechaTexto</span><span>Distancia: @Model.DistanciaTexto</span><span>Inscripción: <strong>@Model.PrecioTexto</strong></span></div>
             </div>
             <div class="stack tight">
-                @if (inscrito)
+                @if (Model.EstaInscrito)
                 {
                     <p class="alert alert-warn">Inscrito · pendiente<br /><span class="small">Verás tu tiempo y ranking cuando la organización termine la carrera.</span></p>
                     <button type="button" class="btn btn-on-dark" data-dialog-open="cancelar-inscripcion">Cancelar inscripción</button>
                 }
-                else
+                else if (User.IsInRole(Roles.Corredor))
                 {
-                    <form asp-action="Inscribirse" asp-route-id="@id" method="post">
-                        <button type="submit" class="btn btn-lime btn-lg btn-block">Inscribirme · $15</button>
+                    <form asp-action="Inscribirse" asp-route-id="@Model.Id" method="post">
+                        <button type="submit" class="btn btn-lime btn-lg btn-block">Inscribirme · @Model.PrecioTexto</button>
                     </form>
                     <span class="xsmall muted">Te ubicamos en tu categoría según tu edad.</span>
+                }
+                else if (User.Identity?.IsAuthenticated != true)
+                {
+                    <a class="btn btn-lime btn-lg btn-block" asp-controller="Cuenta" asp-action="Login">Entrar para inscribirme</a>
                 }
             </div>
         </div>
@@ -52,7 +36,7 @@
 </section>
 
 <dialog id="cancelar-inscripcion" class="confirm danger" aria-labelledby="cancelar-inscripcion-t">
-    <form class="stack" asp-action="CancelarInscripcion" asp-route-id="@id" method="post">
+    <form class="stack" asp-action="CancelarInscripcion" asp-route-id="@Model.Id" method="post">
         <h2 id="cancelar-inscripcion-t" class="section-title">¿Cancelar inscripción?</h2>
         <p>Vas a liberar tu cupo en esta carrera. Puedes volver a inscribirte mientras siga abierta.</p>
         <div class="form-actions">
@@ -66,7 +50,7 @@
     <section class="stack" aria-labelledby="cats">
         <h2 id="cats" class="section-title">Categorías y premios</h2>
         <div class="stats">
-            @foreach (var c in categorias)
+            @foreach (var c in Model.Categorias)
             {
                 <div class="stat">
                     <span class="label-upper">Edad</span>
@@ -81,7 +65,7 @@
     <div class="split">
         <section class="card split-side" aria-labelledby="org">
             <h2 id="org" class="section-title">Organiza</h2>
-            @foreach (var o in organizadoras)
+            @foreach (var o in Model.Organizadoras)
             {
                 <a class="list-item" asp-controller="Organizaciones" asp-action="Index" asp-route-id="@o.Id">
                     <span class="tile">@o.Iniciales</span>
@@ -91,7 +75,11 @@
         </section>
         <section class="card split-side" aria-labelledby="spon">
             <h2 id="spon" class="section-title">Sponsors</h2>
-            @foreach (var s in sponsors)
+            @if (Model.Sponsors.Count == 0)
+            {
+                <p class="empty">Todavía no hay sponsors.</p>
+            }
+            @foreach (var s in Model.Sponsors)
             {
                 <a class="list-item" asp-controller="Organizaciones" asp-action="Index" asp-route-id="@s.Id">
                     <span class="tile lime">@s.Iniciales</span>

@@ -1,23 +1,10 @@
+@model CarrerasIndexViewModel
 @{
     ViewData["Title"] = "Carreras";
     ViewData["Nav"] = "carreras";
-    var estado = ViewData["Estado"] as string ?? "abiertas";
-    var distancia = ViewData["Distancia"] as string;
+    var estado = Model.Estado;
+    var distancia = Model.Distancia;
     var terminadas = estado == "terminadas";
-
-    // DATOS DE EJEMPLO — reemplazar por @model CarrerasIndexViewModel (lista ya filtrada por el controlador)
-    var abiertas = new[]
-    {
-        new { Id = 1, Distancia = "42K", Fecha = "15 NOV", Nombre = "Maratón de la Ciudad", Organiza = "Club Atlético Norte", Info = "5 categorías de edad", Precio = "$35" },
-        new { Id = 2, Distancia = "10K", Fecha = "22 NOV", Nombre = "10K Nocturna del Parque", Organiza = "Municipalidad", Info = "4 categorías de edad", Precio = "$15" },
-        new { Id = 3, Distancia = "21K", Fecha = "06 DIC", Nombre = "Trail Cerro Alto", Organiza = "Andes Outdoor", Info = "4 categorías de edad", Precio = "$25" },
-    };
-    var cerradas = new[]
-    {
-        new { Id = 4, Distancia = "10K", Fecha = "12 OCT", Nombre = "10K Primavera", Organiza = "Club Atlético Norte", Info = "214 corredores en el ranking", Precio = "" },
-        new { Id = 5, Distancia = "21K", Fecha = "28 SEP", Nombre = "Media Maratón Costanera", Organiza = "Corre Sur", Info = "356 corredores en el ranking", Precio = "" },
-    };
-    var lista = terminadas ? cerradas : abiertas;
     var distancias = new[] { "5", "10", "21", "42" };
 }
 
@@ -37,7 +24,7 @@
         <input type="hidden" name="estado" value="@estado" />
         <div class="field wide">
             <label for="q" class="sr-only">Buscar carrera</label>
-            <input id="q" name="q" type="search" class="input sm" placeholder="Buscar por nombre u organización" value="@Context.Request.Query["q"]" />
+            <input id="q" name="q" type="search" class="input sm" placeholder="Buscar por nombre u organización" value="@Model.Q" />
         </div>
         <div class="chips" role="group" aria-label="Distancia">
             <a class="chip @(distancia == null ? "active" : null)" asp-route-estado="@estado">Todas</a>
@@ -49,13 +36,13 @@
         <button type="submit" class="btn btn-dark">Buscar</button>
     </form>
 
-    @if (lista.Length == 0)
+    @if (Model.Carreras.Count == 0)
     {
         <p class="empty">No hay carreras con ese filtro.</p>
     }
 
     <div class="grid-cards">
-        @foreach (var c in lista)
+        @foreach (var c in Model.Carreras)
         {
             <a class="race-card @(terminadas ? "done" : null)" asp-action="@(terminadas ? "Resultados" : "Detalle")" asp-route-id="@c.Id">
                 <div class="race-card-top">
